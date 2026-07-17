@@ -5,303 +5,192 @@ date: 2026-07-17
 lang: zh
 ---
 
-> 从 46 条内容中筛选出 13 条重要资讯。
+> 从 43 条内容中筛选出 8 条重要资讯。
 
 ---
 
-1. [Firefox 通过 WebAssembly 在另一个浏览器中运行](#item-1) ⭐️ 9.0/10
-2. [Moonshot AI 发布 Kimi K3，一个 2.8 万亿参数的开源模型](#item-2) ⭐️ 9.0/10
-3. [日本购买 2.75 万块英伟达 Rubin 芯片用于机器人 AI](#item-3) ⭐️ 9.0/10
-4. [台积电再投千亿美元赴美，Q2 利润飙升 77%](#item-4) ⭐️ 9.0/10
-5. [arXiv 新书：数据科学的数学基础](#item-5) ⭐️ 8.0/10
-6. [LLM 辅助编程：代码审查的认知负担](#item-6) ⭐️ 8.0/10
-7. [GPT-5.6 Codex 漏洞可删除用户主目录](#item-7) ⭐️ 8.0/10
-8. [Inkling：思考机器实验室的开源权重 MoE 模型](#item-8) ⭐️ 8.0/10
-9. [sched-ext 获得子调度器入队和代理执行支持](#item-9) ⭐️ 8.0/10
-10. [ExTernD 通过扩展秩分解提升三元 LLM 量化精度](#item-10) ⭐️ 8.0/10
-11. [QLoRA 的默认学习率 2e-4 在小数据集上受批评](#item-11) ⭐️ 8.0/10
-12. [欧盟裁定谷歌须开放 Android 系统功能与搜索数据给竞争对手](#item-12) ⭐️ 8.0/10
-13. [Truth Social 将向华尔街出售特朗普帖子的快速访问权限](#item-13) ⭐️ 8.0/10
+1. [Bonsai 27B 通过 1 位量化在 iPhone 上本地运行](#item-1) ⭐️ 9.0/10
+2. [华为昇腾 950 超节点亮相，算力号称英伟达 6.7 倍](#item-2) ⭐️ 9.0/10
+3. [AWS 计费错误显示 17 亿美元估算费用](#item-3) ⭐️ 8.0/10
+4. [詹姆斯·韦伯望远镜在岩质系外行星 LHS 1140b 上探测到大气](#item-4) ⭐️ 8.0/10
+5. [Mozilla 报告：开源 AI 模型市场份额激增](#item-5) ⭐️ 8.0/10
+6. [Kaggle 竞赛暴露 AI 提交与评审的不一致性](#item-6) ⭐️ 8.0/10
+7. [DeepSeek V4 Flash 在 RTX 5090 上运行百万上下文（llama.cpp）](#item-7) ⭐️ 8.0/10
+8. [Kimi K3：开源 2.8 万亿参数模型登顶前端编程竞技场](#item-8) ⭐️ 8.0/10
 
 ---
 
 <a id="item-1"></a>
-## [Firefox 通过 WebAssembly 在另一个浏览器中运行](https://simonwillison.net/2026/Jul/16/firefox-in-webassembly/#atom-everything) ⭐️ 9.0/10
+## [Bonsai 27B 通过 1 位量化在 iPhone 上本地运行](https://www.reddit.com/r/LocalLLaMA/comments/1uyz9n2/bonsai_27b_runs_locally_on_an_iphone_a_27b_model/) ⭐️ 9.0/10
 
-Puter 已将 Firefox 浏览器编译为 WebAssembly，使其能够在 Chrome 等另一个浏览器内完全运行。该项目使用 Gecko 引擎，开发成本估计为 25,000 美元的 AI 代币。 这一演示证明完整的桌面浏览器可以在网页环境中运行，为虚拟化、跨平台软件分发和浏览器内开发工具开辟了新可能性。它也展示了 AI 辅助编程如何应对巨大的工程挑战。 该项目依赖 Wisp 协议通过 Puter 的服务器代理所有网络流量，因为 WebAssembly 代码无法打开任意网络连接。团队因 Hacker News 的高流量不得不扩展服务器，并且演示支持端到端加密。
+PrismML 发布了 Bonsai 27B，这是 Qwen3.6-27B 的 1 位量化版本，仅需 3.9GB 内存即可在 iPhone 上本地运行，并保留了约 90%的 FP16 基准性能。 这一突破表明，拥有 270 亿参数的大语言模型现在可以在消费级移动设备上运行，极大地降低了私有、设备端 AI 推理的门槛。它也展示了极端量化技术在实际部署中的可行性。 该模型使用 binary g128 量化，每个权重只有一个符号位，每 128 个权重共享一个 FP16 缩放因子，实现每权重约 1.125 位，且没有高精度“逃生通道”。甚至嵌入层、注意力/MLP 投影和语言模型头部都被二值化，这在 1 位方案中很少见。
 
-rss · Simon Willison · 7月16日 23:34
+reddit · r/LocalLLaMA · /u/ElmBark · 7月17日 13:08
 
-**背景**: WebAssembly \(WASM\) 是一种二进制指令格式，允许用 C++ 等语言编写的代码在浏览器中以接近原生的速度运行。传统上，由于安全和性能限制，浏览器无法嵌套在其他浏览器内。将 Firefox 这样的完整浏览器编译成 WASM 是一项需要巨大计算量和优化工作的艰巨任务，而该项目通过大量使用 AI 辅助实现了这一目标。
+**背景**: 量化是将模型权重的精度降低到更低位，以较小的精度损失换取内存和计算的大幅减少。标准的 16 位（FP16）27B 模型需要约 54GB，远超手机内存。1 位量化将压缩推向极致，每个权重表示为+1 或-1，并带有共享缩放因子，使得设备端部署成为可能。
 
 <details><summary>参考链接</summary>
 <ul>
-<li><a href="https://en.wikipedia.org/wiki/Wire_protocol">Wire protocol</a></li>
-<li><a href="https://github.com/MercuryWorkshop/wisp-protocol">GitHub - MercuryWorkshop/wisp-protocol: Wisp is a low-overhead, easy to ...</a></li>
+<li><a href="https://prismml.com/news/prismml-releases-bonsai-27b">PrismML — PrismML Announces 1-bit Bonsai 27B - The First 27B Model to ...</a></li>
+<li><a href="https://prismml.com/news/bonsai-27b">PrismML — Announcing Bonsai 27B: The First 27B-Class Model to ...</a></li>
+<li><a href="https://huggingface.co/prism-ml/Bonsai-27B-mlx-1bit">prism-ml/Bonsai-27B-mlx-1bit · Hugging Face</a></li>
 
 </ul>
 </details>
 
-**社区讨论**: Hacker News 社区表现出浓厚兴趣，导致团队不得不扩展服务器以应对流量。该项目被誉为突破性的工程壮举，尽管一些人质疑其实用场景和 AI 辅助开发的成本效益。
-
-**标签**: `#WebAssembly`, `#Firefox`, `#browser`, `#virtualization`, `#AI-assisted development`
+**标签**: `#quantization`, `#mobile inference`, `#LLM compression`, `#binary weights`, `#local LLM`
 
 ---
 
 <a id="item-2"></a>
-## [Moonshot AI 发布 Kimi K3，一个 2.8 万亿参数的开源模型](https://simonwillison.net/2026/Jul/16/kimi-k3/#atom-everything) ⭐️ 9.0/10
+## [华为昇腾 950 超节点亮相，算力号称英伟达 6.7 倍](https://www.ithome.com/0/978/019.htm) ⭐️ 9.0/10
 
-中国 AI 实验室 Moonshot AI 宣布了 Kimi K3，一个 2.8 万亿参数的开源模型，声称其性能超越 DeepSeek-V4-Pro，并与 Claude Opus 4.8 和 GPT-5.5 等顶级模型竞争。开放权重版本承诺于 2026 年 7 月 27 日发布。 Kimi K3 作为迄今为止最大的开放权重模型，代表了一个重要里程碑，可能加速 AI 的商品化，并加剧中美 AI 实验室之间的竞争。其每任务成本较低但性能高，可能对整个行业的价格造成压力。 该模型使用 2.8 万亿参数，定价为每百万输入 tokens 3 美元、每百万输出 tokens 15 美元，使其成为迄今为止最昂贵的中国开放模型。它在 Arena.ai 的前端代码竞技场中获得最高排名，并在 Artificial Analysis 的长期知识工作评估中达到 1547 Elo。
+在 2026 年世界人工智能大会上，华为首次公开展示了基于灵衢互联协议和超节点架构的昇腾 950 超节点（Atlas 950 SuperPoD），最大支持 1024 卡规模，提供 1 EFLOPS FP8 和 2 EFLOPS FP4 算力，拥有 256 TB 全局统一内存。据中银证券报告，其总算力达到英伟达同级 NVL144 系统的 6.7 倍。 这一发布表明华为持续挑战英伟达在 AI 计算硬件领域的主导地位，尤其在大规模训练和推理方面。如果性能声称得到验证，6.7 倍的算力优势可能重塑竞争格局，并加速国产 AI 芯片在中国的应用。 昇腾 950 超节点采用华为自研的灵衢（UnifiedBus）互联协议，该协议用五层协议栈替代 PCIe、NVLink 和 RDMA，支持 8192 卡无收敛全互联。系统还采用 FP8 和 FP4 精度格式，这些格式常用于高效的 AI 推理和低精度训练。
 
-rss · Simon Willison · 7月16日 20:19
+telegram · zaihuapd · 7月17日 10:27
 
-**背景**: “鹈鹕基准测试”是一种幽默的非正式测试，要求 AI 模型生成一个骑自行车的鹈鹕的 SVG 图像，常用于比较模型能力。像 Kimi K3 这样的开放权重模型公开其训练参数，便于进一步研究和微调。参数数量的快速增长反映了 AI 行业追求更强大模型的趋势，而 Moonshot AI 和 DeepSeek 等中国实验室正在挑战美国领先者。
+**背景**: 华为的灵衢（UnifiedBus）互联协议于 2025 年 9 月在华为全联接大会上正式发布，旨在解决大规模计算资源的互联技术难题。FP8 和 FP4 是低精度浮点格式，广泛用于 AI 工作负载以减少内存带宽并加速计算，同时保持可接受的精度。昇腾 950 是华为超节点系列的最新成员，此前昇腾 384 超节点已在互联网、运营商、金融等行业商用落地超过 750 套。
 
 <details><summary>参考链接</summary>
 <ul>
-<li><a href="https://playcode.io/blog/macbook-svg-benchmark">The Pelican Benchmark Is Saturated. We Made 9 AI... | Playcode Blog</a></li>
-<li><a href="https://ndurner.github.io/pelican-benchmark">Pelican vs. Llama 3.1 405B and others | Nils Durner’s Blog</a></li>
-<li><a href="https://huggingface.co/spaces/victor/pelican-benchmark">Pelican Benchmark - a Hugging Face Space by victor</a></li>
+<li><a href="https://baike.baidu.com/item/%E7%81%B5%E8%A1%A2/66774401">灵衢 - 百度百科</a></li>
+<li><a href="https://www.toutiao.com/article/7551352889764020755/">华为全联接大会 2025：发布灵衢互联协议与多系列超节点产品，引领 AI ...</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Minifloat">Minifloat - Wikipedia</a></li>
 
 </ul>
 </details>
 
-**社区讨论**: 社区评论包括 Simon Willison 对模型生成鹈鹕 SVG 的测试，花费 25 美分，他指出这是来自中国模型最贵的鹈鹕。其他评论者讨论了商品化的含义，softwaredoug 认为中国实验室旨在通过商品化 AI 软件来销售硬件，而 m3h 则强调了巨大的模型规模和高运营成本。
-
-**标签**: `#AI`, `#open-source`, `#large language models`, `#Moonshot AI`, `#Kim K3`
+**标签**: `#Huawei`, `#Ascend 950`, `#AI Hardware`, `#Supercomputer`, `#Compute`
 
 ---
 
 <a id="item-3"></a>
-## [日本购买 2.75 万块英伟达 Rubin 芯片用于机器人 AI](https://www.bloomberg.com/news/articles/2026-07-16/japan-to-buy-nvidia-rubin-chips-to-build-sovereign-ai-for-robots) ⭐️ 9.0/10
+## [AWS 计费错误显示 17 亿美元估算费用](https://news.ycombinator.com/item?id=48945241) ⭐️ 8.0/10
 
-日本通过新成立的 Noetra 公司宣布计划购买 27,500 块英伟达 Rubin 芯片，建设大型数据中心，用于开发面向机器人的主权基础 AI 模型。该项目计划在 2027 年 3 月前发布首个 AI 模型，并在几年内推出机器人专用版本。 这项获得 240 亿美元政府支持的战略举措标志着日本减少对美中 AI 技术依赖的雄心，目标是在 2040 年前占据全球机器人市场 30%以上份额。它使日本成为中美之外全球 AI 竞赛中的“第三种选择”。 由田场广信领导的 Noetra 将牵头该项目，合作伙伴包括软银、丰田支持的 Preferred Networks 和 NEC。27,500 块 Rubin 芯片属于英伟达下一代架构，配备基于 ARM 的“Vera”CPU，设计为与 Rubin GPU 协同工作的超级芯片。
+2026 年 7 月 16 日，AWS Cost Explorer 中的一个错误导致单位定价出错，部分客户看到的估算账单高达 17 亿美元，而他们的正常使用费通常不足 5 美元。 这一高调计费错误损害了客户信任，并凸显了云服务中精确计量和定价的重要性，可能影响数百万 AWS 用户。 根本原因是单位转换错误：AWS 按字节而非千兆字节计费，导致费用膨胀约 10 亿倍；实际发票和成本与使用报告保持准确。
 
-telegram · zaihuapd · 7月16日 10:59
+hackernews · nprateem · 7月17日 09:42
 
-**背景**: 英伟达 Rubin 架构在 2026 年 CES 上发布，是 Blackwell 平台的继任者，为 AI 工作负载提供显著的计算能力和效率提升。主权 AI 指国家自主开发和掌控 AI 基础设施及模型的能力，以减少对外国技术的依赖。机器人基础模型是设计用于跨多种机器人类型和任务泛化的 AI 系统，使机器人能够在非结构化环境中自主运行。
+**背景**: AWS Cost Explorer 基于计量使用量生成估算账单数据。云服务提供商通常按千兆字节 \(GB\) 收取存储和数据传输费用。十进制前缀（GB = 10^9 字节）与二进制前缀（GiB = 2^30 字节）之间的混淆，或简单的单位遗漏，都可能导致巨大错误。此次事件中，定价计划默认使用字节而非 GB。
 
 <details><summary>参考链接</summary>
 <ul>
-<li><a href="https://explore.n1n.ai/blog/nvidia-rubin-chip-architecture-ai-future-2026-01-06">Nvidia Announces Rubin Chip Architecture as Blackwell Successor</a></li>
-<li><a href="https://www.linkedin.com/pulse/navigating-future-sovereign-ai-blueprint-global-arif-sheikh-hluxc">the Future of Sovereign AI : A Blueprint for Global Empowerme</a></li>
-<li><a href="https://www.linkedin.com/pulse/robotic-foundation-models-physical-ai-innovations-anand-ramachandran-fzfge">Robotic Foundation Models and Physical AI Models : Innovations...</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Binary_prefix">Binary prefix - Wikipedia</a></li>
+<li><a href="https://thenextweb.com/news/aws-billing-bug-billion-dollar-estimates">An AWS billing bug sent users estimated charges of up to $2.5 ... - TNW</a></li>
+<li><a href="https://techcrunch.com/2026/07/17/amazon-fixing-bug-that-billed-some-aws-customers-billions-of-dollars/">Amazon fixing bug that billed some AWS customers billions of ...</a></li>
 
 </ul>
 </details>
 
-**标签**: `#AI`, `#Robotics`, `#NVIDIA`, `#Japan`, `#Sovereign AI`
+**社区讨论**: 一位前 AWS 工程师分享了过往类似错误的第一手经验，确认是单位不匹配。许多用户表示看到天文数字账单时感到震惊和肾上腺素飙升，而其他人则指出实际费用从未受影响，AWS 响应迅速。
+
+**标签**: `#AWS`, `#billing`, `#cloud computing`, `#bug`, `#outage`
 
 ---
 
 <a id="item-4"></a>
-## [台积电再投千亿美元赴美，Q2 利润飙升 77%](https://www.reuters.com/world/asia-pacific/tsmcs-second-quarter-profit-seen-hitting-record-ai-boom-2026-07-15/) ⭐️ 9.0/10
+## [詹姆斯·韦伯望远镜在岩质系外行星 LHS 1140b 上探测到大气](https://www.bbc.com/news/articles/cy4kdd1e0ejo) ⭐️ 8.0/10
 
-台积电宣布再向美国亚利桑那州工厂投资 1000 亿美元，总投资额达 2650 亿美元；同时公布第二季度净利润达 7066 亿新台币（约 220 亿美元），同比飙升 77%，创历史新高。 这一巨额投资凸显了台积电对 AI 芯片需求持续增长的信心，并巩固了其向美国扩张的战略，重塑全球半导体供应链，降低对台湾的依赖。 台积电将 2026 年资本支出预测上调至 600 亿至 640 亿美元，并预计全年美元营收增长略超 40%。亚利桑那州目前已有 8 座工厂在建或规划中，未来可能再增 4 座。
+美国宇航局的詹姆斯·韦伯太空望远镜在岩质系外行星 LHS 1140b 上探测到了大气，该行星位于其红矮星的宜居带内，排除了此前的小型海王星分类。 这是首次在潜在宜居的类地行星上确认存在大气，标志着系外行星研究的一个重大里程碑，使我们更接近识别地球以外的生命迹象。 LHS 1140b 的质量约为地球的 5.6 倍，半径比地球大 70%，距离地球 48 光年。该探测是通过 JWST 在行星经过其恒星背后时进行的发射光谱分析完成的。
 
-telegram · zaihuapd · 7月16日 12:29
+hackernews · neversaydie · 7月17日 14:06 · [社区讨论](https://news.ycombinator.com/item?id=48947560)
 
-**背景**: 台积电是全球最大的专业半导体代工厂，为苹果、英伟达、AMD 等主要客户生产芯片。美国一直推动将先进芯片制造迁回本土以保障供应链安全，并出台了《芯片法案》提供补贴。台积电在亚利桑那州的首笔投资始于 2020 年。
+**背景**: LHS 1140b 于 2017 年由 MEarth 项目发现，围绕一颗红矮星运行。红矮星温度较低，宜居带更近，行星常受到强烈的恒星辐射。小型海王星是具有厚大气层和岩质核心的系外行星，不同于岩质类地行星。JWST 的光谱分析可以通过探测行星的大气成分来区分这些类型。
 
-**标签**: `#TSMC`, `#semiconductor`, `#AI`, `#investment`, `#manufacturing`
+<details><summary>参考链接</summary>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/LHS_1140_b">LHS 1140 b - Wikipedia</a></li>
+<li><a href="https://en.wikipedia.org/wiki/LHS_1140">LHS 1140 - Wikipedia</a></li>
+<li><a href="https://science.nasa.gov/exoplanet-catalog/lhs-1140-b/">LHS 1140 b - Science@NASA</a></li>
+
+</ul>
+</details>
+
+**社区讨论**: 评论者最初对红矮星周围的岩质行星保留大气表示怀疑，但后来承认 JWST 数据排除了小型海王星的假设。一些人讨论了费米悖论和建造太阳透镜望远镜的必要性，而另一些人指出 48 光年相对较近，并猜测了接近光速的推进技术。
+
+**标签**: `#exoplanet`, `#atmosphere`, `#JWST`, `#astronomy`, `#habitable-zone`
 
 ---
 
 <a id="item-5"></a>
-## [arXiv 新书：数据科学的数学基础](https://arxiv.org/abs/2607.11938) ⭐️ 8.0/10
+## [Mozilla 报告：开源 AI 模型市场份额激增](https://stateofopensource.ai/) ⭐️ 8.0/10
 
-一本名为《数据科学的数学》的新书已在 arXiv 上发布，强调高维直觉及其对现代数据科学的重要性。 这本书填补了空白，为数据科学提供了严谨的数学基础，帮助从业者理解高维直觉为何失效以及它如何影响模型训练和优化。 该书从解释高维下直觉如何失效（尖峰性、体积等）入手，并联系到随机梯度下降和高维模型等主题。它作为开放获取的 LaTeX 源码在 arXiv 上提供。
+Mozilla 发布了一份分析开源 AI 现状的报告，显示开放模型在 OpenRouter 上处理的 token 占比已从四个月前的 40%上升至 63%。 这一快速增长表明开源模型正在挑战 Anthropic 和 OpenAI 等闭源领导者的主导地位，可能重塑 AI 行业的竞争格局。 该演示因其低质量的 LLM 生成文本而受到批评，但底层数据突显了开放模型在四个月内 token 处理量增长了五倍。
 
-hackernews · Anon84 · 7月16日 20:38 · [社区讨论](https://news.ycombinator.com/item?id=48939896)
+hackernews · rellem · 7月17日 14:31 · [社区讨论](https://news.ycombinator.com/item?id=48947825)
 
-**背景**: 高维数据在现代数据科学中很常见，但我们低维的直觉（如距离、体积）常常误导我们。这种“维度诅咒”使得许多机器学习算法难以处理。理解高维几何对于构建稳健模型至关重要。
+**背景**: 开源 AI 模型（如 Llama 和 Mistral）可免费使用和修改，而 GPT-4 等闭源模型则不然。向开放模型的转变可能降低成本并加速创新，像苹果这样的公司可以优化它们以在设备上使用。
 
-<details><summary>参考链接</summary>
-<ul>
-<li><a href="https://www.math.uci.edu/~rvershyn/papers/HDP-book/HDP-2.pdf">High - Dimensional Probability</a></li>
-<li><a href="https://en.wikipedia.org/wiki/High-dimensional_statistics">High-dimensional statistics - Wikipedia</a></li>
+**社区讨论**: 社区评论表达了复杂的情绪：一些人庆祝开放模型的崛起，认为这对闭源公司构成威胁，而另一些人则批评演示文稿的 AI 生成内容质量低下，并指出争论本身提升了话题的重要性。
 
-</ul>
-</details>
-
-**社区讨论**: 评论者称赞该书对高维直觉的关注，有人指出它对现代数据科学至关重要。另有人提到 Steve Brunton 即将出版的相关书籍。讨论还涉及数据科学定义的演变以及统计学的重要性。
-
-**标签**: `#mathematics`, `#data-science`, `#high-dimensional`, `#education`, `#arxiv`
+**标签**: `#open source AI`, `#community discussion`, `#model market share`, `#LLM trends`
 
 ---
 
 <a id="item-6"></a>
-## [LLM 辅助编程：代码审查的认知负担](https://pydantic.dev/articles/the-human-in-the-loop-is-tired) ⭐️ 8.0/10
+## [Kaggle 竞赛暴露 AI 提交与评审的不一致性](https://www.kaggle.com/competitions/kaggle-measuring-agi/discussion/724918#3498423) ⭐️ 8.0/10
 
-一篇文章指出，LLM 辅助编程将编写代码的有益体验转变为审查 AI 生成代码的沉重认知负荷，颠覆了传统开发体验。 这意义重大，因为它揭示了 AI 工具隐藏的心理成本，可能影响开发者的满意度、生产力和长期福祉，挑战了 AI 总能改善开发者体验的说法。 文章提出了‘人类奖励函数’问题，即手动编码带来多巴胺刺激，而 AI 将其自动化后只剩下审查的负担。社区成员创造了‘human on the hook’一词，强调人类只在出现问题时才被追究责任。
+Kaggle 社区讨论指出，在&\#x27;Measuring AGI&\#x27;竞赛中，提交和评审均由 AI 处理，导致不一致性以及提示注入攻击，参赛者可以欺骗 AI 评审宣布他们获胜。 这引发了对 AI 驱动竞赛和评审完整性的严重担忧，因为 AI 评审容易被操纵且缺乏常识，可能削弱各行业对自动化评估系统的信任。 具体而言，社区成员报告称 AI 评审可能通过提示注入被操纵以宣布获胜，而提交的参赛作品往往完全由 AI 生成，几乎没有人类输入，焦点从人类技能转向想法实现或内部人士优势。
 
-hackernews · haritha1313 · 7月17日 00:21 · [社区讨论](https://news.ycombinator.com/item?id=48942000)
+hackernews · twerkmeister · 7月17日 11:30 · [社区讨论](https://news.ycombinator.com/item?id=48946010)
 
-**背景**: 人在回路中（HITL）是指人类主动监控或引导 AI 系统的范式。在 LLM 辅助编程中，开发人员审查 AI 生成的代码，由于他们自己并未编写代码，因此验证正确性可能非常耗费认知。从编写代码到审查代码的转变改变了开发工作的性质及其心理回报。
+**背景**: 提示注入是一种安全漏洞，精心设计的输入会导致 AI 模型产生意外行为，绕过安全防护。LLM 作为评审的系统已知存在偏见且不可靠。Kaggle 是一个数据科学竞赛平台，传统上涉及人类技能，但近期事件显示 AI 在提交和评审中的使用日益增加。
 
 <details><summary>参考链接</summary>
 <ul>
-<li><a href="https://www.geeksforgeeks.org/artificial-intelligence/human-in-the-loop-hitl-decision-making/">Human-in-the-Loop (HITL) - GeeksforGeeks</a></li>
-<li><a href="https://hai.stanford.edu/ai-definitions/what-is-human-in-the-loop">What is Human-in-the-Loop? - Stanford HAI</a></li>
-<li><a href="https://sanjewa.com/blogs/ai-code-review-cognitive-burden-harder-than-writing/">AI Code Review: Why It&#x27;s Harder Than Writing Code</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Prompt_injection_attack">Prompt injection attack</a></li>
+<li><a href="https://arxiv.org/abs/2604.23178">[2604.23178] Judging the Judges: A Systematic Evaluation of Bias ...</a></li>
+<li><a href="https://www.techtimes.com/articles/318360/20260614/when-ai-grades-ai-why-smarter-models-are-not-fairer-judges-their-own-work.htm">When AI Grades AI: Why Smarter Models Are Not Fairer Judges of Their ...</a></li>
 
 </ul>
 </details>
 
-**社区讨论**: 评论者普遍对‘human on the hook’一词产生共鸣，指出它捕捉到了不对称风险：开发者在成功时没有功劳，但在失败时却要承担责任。一些人表示，通过将 AI 视为代码生成器而非代理，并保持计划性方法以避免认知过载，他们享受到了 AI 辅助。
+**社区讨论**: 评论者表示沮丧，认为 AI 已经&\#x27;扼杀&\#x27;了公平的黑客马拉松，一人指出提示注入可以人为宣布获胜者。其他人则认为 Kaggle 一直存在黑箱模型和暴力方法的问题，因此这并非全新。
 
-**标签**: `#LLM`, `#software engineering`, `#developer experience`, `#code review`, `#AI-assisted programming`
+**标签**: `#AI ethics`, `#Kaggle`, `#competition integrity`, `#prompt injection`, `#AI evaluation`
 
 ---
 
 <a id="item-7"></a>
-## [GPT-5.6 Codex 漏洞可删除用户主目录](https://simonwillison.net/2026/Jul/16/bad-codex-bug/#atom-everything) ⭐️ 8.0/10
+## [DeepSeek V4 Flash 在 RTX 5090 上运行百万上下文（llama.cpp）](https://www.reddit.com/r/LocalLLaMA/comments/1uz5w3y/deepseek_v4_flash_on_5090_in_llamacpp_with_1/) ⭐️ 8.0/10
 
-Thibault Sottiaux 报告了一个 GPT-5.6 Codex 的漏洞：在启用完全访问模式且关闭沙箱保护时，模型可能意外删除用户的主目录。 该漏洞凸显了 AI 编码代理的关键安全风险，意外删除文件可能导致数据丢失和系统受损。它强调了安全部署生成式 AI 工具时沙箱保护和自动审核功能的必要性。 该漏洞在模型尝试覆盖 $HOME 环境变量以设置临时目录时触发，但错误地删除了 $HOME。触发条件包括完全访问模式、无沙箱保护以及关闭自动审核。
+一位用户分享了在 RTX 5090 上使用 llama.cpp 运行 DeepSeek V4 Flash（284B 参数混合专家模型）并达到完整 100 万 token 上下文窗口的基准测试和配置，预填充速度约 650–700 tokens/s，生成速度约 17 tokens/s。 这表明，在高端消费级硬件上实际运行具有百万上下文的巨型 MoE 模型已成为可能，为文档分析、代码生成等长上下文任务打开了本地推理的大门，无需依赖云 API。 用户使用了来自 Unsloth 的 Q8\_K\_XL 量化 GGUF 模型，加载时间为 32 秒；他们指出速度尚不如 Qwen 模型，但 llama.cpp 仍有优化空间。
 
-rss · Simon Willison · 7月16日 17:45
+reddit · r/LocalLLaMA · /u/Shoddy\_Bed3240 · 7月17日 17:14
 
-**背景**: Codex 是 OpenAI 的 AI 编码助手，可以执行命令和修改文件。沙箱技术隔离执行环境以防止损害，自动审核功能会暂停有风险的操作等待用户批准。没有这些保护，AI 代理可能执行破坏性操作，如删除文件。
+**背景**: DeepSeek V4 Flash 是 DeepSeek V4 系列的预览模型，采用混合专家（MoE）架构，总参数 284B，但每次推理仅激活 13B 参数，因而推理效率较高。它支持 100 万 token 的上下文窗口。llama.cpp 是一个开源推理引擎，可在消费级硬件上本地运行 LLM，使用 GGUF 格式优化模型加载和量化。
 
 <details><summary>参考链接</summary>
 <ul>
-<li><a href="https://northflank.com/blog/how-to-sandbox-ai-agents">How to sandbox AI agents in 2026: MicroVMs, gVisor &amp; isolation ...</a></li>
-<li><a href="https://developer.nvidia.com/blog/practical-security-guidance-for-sandboxing-agentic-workflows-and-managing-execution-risk/">Practical Security Guidance for Sandboxing Agentic Workflows and ...</a></li>
-<li><a href="https://openai.com/index/running-codex-safely/">Running Codex safely at OpenAI | OpenAI</a></li>
+<li><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash">deepseek -ai/ DeepSeek - V 4 - Flash · Hugging Face</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Llama.cpp">Llama.cpp</a></li>
+<li><a href="https://en.wikipedia.org/wiki/GGUF">GGUF - Wikipedia</a></li>
 
 </ul>
 </details>
 
-**标签**: `#codex`, `#coding-agents`, `#generative-ai`, `#ai-safety`
+**标签**: `#deepseek`, `#llama.cpp`, `#local-llm`, `#inference`, `#benchmark`
 
 ---
 
 <a id="item-8"></a>
-## [Inkling：思考机器实验室的开源权重 MoE 模型](https://simonwillison.net/2026/Jul/16/inkling/#atom-everything) ⭐️ 8.0/10
+## [Kimi K3：开源 2.8 万亿参数模型登顶前端编程竞技场](https://www.kimi.com/blog/kimi-k3) ⭐️ 8.0/10
 
-由 Mira Murati 领导的思考机器实验室发布了 Inkling，这是一个采用 Apache-2.0 许可的混合专家多模态模型，总参数量 975B，活跃参数量 41B，在包含文本、图像、音频和视频的 45 万亿 token 上训练。他们还宣布了 Inkling-Small（总参数量 276B，活跃参数量 12B），其权重将在测试完成后发布。 此次发布增强了美国开源权重生态系统，提供了与 DeepSeek、Qwen 等中国开源模型竞争的新选择，与 NVIDIA Nemotron 和 Gemma 4 并列。它提供了一个针对微调优化（通过思考机器的 Tinker 平台）的强基座模型，降低了定制门槛。 模型卡信息稀疏，缺乏详细技术规格和训练数据文档，仅含糊提及使用公共和第三方来源。思考机器明确表示 Inkling 不是前沿模型，而是一个适合微调的多功能基座模型，具有多模态能力和高效推理。
+月之暗面发布了全球首个开源 2.8 万亿参数模型 Kimi K3，该模型在 Frontend Code Arena 排行榜中以 1679 分登顶，在前端编程任务上超越了 Claude Fable 5。 此次发布是开源 AI 的重要里程碑，展示了采用新型架构（Kimi Delta Attention 和 Attention Residuals）的模型在特定基准测试上能与顶级专有模型匹敌，有望加速开源社区的采用与创新。 Kimi K3 是一个拥有 2.8 万亿参数的稀疏混合专家模型，基于 Kimi Delta Attention（混合线性注意力机制）和 Attention Residuals 构建，具备原生视觉能力和 100 万 token 上下文窗口；API 定价为缓存命中每百万 token 0.30 美元、缓存未命中 3.00 美元、输出 15.00 美元，完整模型权重将于 2026 年 7 月开放。
 
-rss · Simon Willison · 7月16日 15:35
+telegram · zaihuapd · 7月17日 00:02
 
-**背景**: 混合专家（MoE）是一种神经网络架构，它将计算划分为多个专门的“专家”子网络，通过门控机制每个输入仅激活部分专家。这使得模型可以拥有很大的总参数量，同时保持较低的活跃参数（计算成本），从而实现高效扩展。开源权重模型（如 Apache-2.0 许可下发布的模型）提供公开可下载、修改和部署的权重文件，促进了 AI 社区的可复现性和定制化。
+**背景**: Kimi Delta Attention（KDA）是一种线性注意力机制，通过逐通道对角门控改进了 Gated DeltaNet，比传统全注意力更高效地管理记忆。Attention Residuals（AttnRes）允许每个 Transformer 层选择性聚合所有先前层的信息，增强了长程依赖。该模型采用稀疏 MoE 结构，以较低的算力成本实现了 2.8 万亿参数，远低于同规模稠密模型。
 
 <details><summary>参考链接</summary>
 <ul>
-<li><a href="https://en.wikipedia.org/wiki/Mixture_of_experts">Mixture of experts - Wikipedia</a></li>
-<li><a href="https://developer.nvidia.com/blog/applying-mixture-of-experts-in-llm-architectures/">Applying Mixture of Experts in LLM Architectures | NVIDIA Technical Blog</a></li>
-<li><a href="https://arxiv.org/abs/2507.11181">[2507.11181] Mixture of Experts in Large Language Models</a></li>
+<li><a href="https://arxiv.org/abs/2510.26692">[2510.26692] Kimi Linear: An Expressive, Efficient Attention ... GitHub - MoonshotAI/Kimi-Linear Kimi K3 - Kimi API Platform Kimi Linear: An Expressive, Efficient Attention Architecture Moonshot AI Releases Kimi K3: A 2.8 Trillion Parameter Open ... GitHub - hwilner/kimi-delta-attention: Educational ... Kimi K3 (Moonshot AI) - Cloudflare Docs</a></li>
+<li><a href="https://github.com/MoonshotAI/Kimi-Linear">GitHub - MoonshotAI/Kimi-Linear</a></li>
+<li><a href="https://arena.ai/leaderboard/code/html">HTML Code AI Leaderboard - Best AI Models for HTML Generation</a></li>
 
 </ul>
 </details>
 
-**标签**: `#open-weights`, `#Mixture-of-Experts`, `#multimodal`, `#LLM`, `#AI`
-
----
-
-<a id="item-9"></a>
-## [sched-ext 获得子调度器入队和代理执行支持](https://lwn.net/Articles/1082717/) ⭐️ 8.0/10
-
-Linux 的可扩展调度类 sched-ext 即将完成子调度器层次结构和代理执行支持，具体新增了 enqueue\(\) 回调路径及用于层级 CPU 访问控制的能力机制。 这使得多租户系统可以为不同的控制组使用不同的基于 BPF 的调度器，提高了隔离性和灵活性。代理执行将通过跟踪阻塞-依赖关系来解决优先级反转问题。 入队路径使用三级能力系统（空闲 CPU、调度队列、抢占），从父调度器向下传递。父调度器通过 scx\_bpf\_sub\_grant\(\) 授予能力，子调度器不能超越父调度器的能力。
-
-rss · LWN.net · 7月16日 14:00
-
-**背景**: sched-ext 允许通过 struct\_ops 将自定义 CPU 调度器实现为 BPF 程序。最初只支持单个调度器，现在支持与控制组关联的层次化子调度器。代理执行跟踪任务阻塞关系，允许代理任务代表被阻塞的任务执行，解决优先级反转。入队路径此前缺少层级控制，此补丁系列补全了这一点。
-
-<details><summary>参考链接</summary>
-<ul>
-<li><a href="https://www.kernel.org/doc/html/next/scheduler/sched-ext.html">Extensible Scheduler Class — The Linux Kernel documentation</a></li>
-<li><a href="https://sched-ext.com/docs/OVERVIEW">Overview - sched_ext</a></li>
-<li><a href="https://lwn.net/Articles/1030842/">A proxy-execution baby step [LWN.net]</a></li>
-
-</ul>
-</details>
-
-**标签**: `#Linux kernel`, `#scheduling`, `#sched\_ext`, `#BPF`, `#systems programming`
-
----
-
-<a id="item-10"></a>
-## [ExTernD 通过扩展秩分解提升三元 LLM 量化精度](https://www.reddit.com/r/MachineLearning/comments/1uy2zb3/externd_expandedrank_ternary_decomposition/) ⭐️ 8.0/10
-
-ExTernD 提出了一种后训练量化方法，将每个权重矩阵分解为两个较小的三元矩阵和一个对角缩放矩阵，从而可以任意扩展内部秩以提高精度。 该方法克服了固定尺寸三元量化的固有精度限制，使三元 LLM 能够在仅适度增加 VRAM 的情况下接近高精度方法的精度，这对高效部署至关重要。 扩展秩可以任意大，实验表明，即使适度扩展也能在仅比当前三元方法略多内存的情况下显著提高精度。
-
-reddit · r/MachineLearning · /u/LMTLS5 · 7月16日 13:31
-
-**背景**: 三元量化将权重表示为-1、0 或+1，相比全精度模型节省内存和计算。然而，先前用于 LLM 的固定尺寸三元后训练量化（PTQ）存在严重的精度损失。ExTernD 通过使用扩展秩分解来解决这一问题，在不需重新训练的情况下增加表示能力。
-
-<details><summary>参考链接</summary>
-<ul>
-<li><a href="https://arxiv.org/abs/2303.01505">[2303.01505] Ternary Quantization: A Survey</a></li>
-<li><a href="https://developer.nvidia.com/blog/optimizing-llms-for-performance-and-accuracy-with-post-training-quantization/">Optimizing LLMs for Performance and Accuracy with Post-Training Quantization | NVIDIA Technical Blog</a></li>
-
-</ul>
-</details>
-
-**标签**: `#quantization`, `#LLM`, `#efficiency`, `#deep learning`, `#post-training quantization`
-
----
-
-<a id="item-11"></a>
-## [QLoRA 的默认学习率 2e-4 在小数据集上受批评](https://www.reddit.com/r/MachineLearning/comments/1uy1z8b/the_qlora_2e4_default_is_wrong_under_10k_samples/) ⭐️ 8.0/10
-
-一位 Reddit 用户指出，针对少于 1 万样本的小数据集，QLoRA 微调中广泛推荐的默认学习率 2e-4 会导致过拟合，建议改用 1e-4。 这挑战了微调社区中的一个常见假设，可能为处理小数据集的实践者节省大量时间和资源，而小数据集在实际应用中很常见。 该用户报告称，将学习率从 2e-4 改为 1e-4，并将轮次从 3 增加到 5，导致评估指标大幅提升，此前他们花了数周调试数据和提示模板。2e-4 的默认值源于对 52k 样本的 Alpaca 数据集的微调，而非更小的数据集。
-
-reddit · r/MachineLearning · /u/Pretty-Ad774 · 7月16日 12:50
-
-**背景**: QLoRA 是一种高效的微调方法，结合了量化和低秩适应（LoRA）以减少内存使用，使得在消费级 GPU 上微调大语言模型成为可能。学习率是一个关键超参数；在小数据集上学习率过高会导致过拟合，即模型记住训练数据但无法泛化。默认学习率 2e-4 是在使用 52k 样本的 Alpaca 数据集的 QLoRA 论文中确立的，但许多实际微调任务使用的数据集要小得多。
-
-<details><summary>参考链接</summary>
-<ul>
-<li><a href="https://arxiv.org/abs/2305.14314">[2305.14314] QLoRA: Efficient Finetuning of Quantized LLMs</a></li>
-<li><a href="https://github.com/artidoro/qlora">GitHub - artidoro/qlora: QLoRA: Efficient Finetuning of Quantized LLMs · GitHub</a></li>
-
-</ul>
-</details>
-
-**标签**: `#QLoRA`, `#fine-tuning`, `#learning rate`, `#overfitting`, `#small datasets`
-
----
-
-<a id="item-12"></a>
-## [欧盟裁定谷歌须开放 Android 系统功能与搜索数据给竞争对手](https://www.theverge.com/policy/966438/eu-google-android-ai-interoperability-search-data-dma) ⭐️ 8.0/10
-
-欧盟委员会裁定谷歌必须向竞争对手开放 Android 的 11 项系统功能及部分搜索数据，使得 ChatGPT 等第三方 AI 助手能够获得与谷歌 Gemini 同等的系统级权限和数据访问。 这一决定可能从根本上重塑 Android 生态系统和搜索市场，加剧 AI 助手和搜索引擎的竞争，为用户提供更多选择。同时，它也为欧盟《数字市场法案》下监管守门人平台设立了先例。 这 11 项功能包括第三方助手深度集成所需的核心 Android 能力，搜索数据共享则限于特定用途以保护隐私。谷歌仍可基于合理的安全和隐私考量拒绝访问，但任何限制必须符合欧盟规定。
-
-telegram · zaihuapd · 7月16日 13:19
-
-**背景**: 《数字市场法案》（DMA）是欧盟的一项法规，将谷歌等大型平台指定为“守门人”，并施加义务以确保公平竞争。谷歌的 Android 操作系统和 Google 搜索是 DMA 下的核心平台服务，此次裁决是强制合规的约束性措施。
-
-<details><summary>参考链接</summary>
-<ul>
-<li><a href="https://en.wikipedia.org/wiki/Digital_Markets_Act">Digital Markets Act</a></li>
-<li><a href="https://nairametrics.com/2026/07/16/eu-orders-google-to-share-android-features-search-data-with-rivals/">EU orders Google to share Android features, search data with ...</a></li>
-<li><a href="https://www.upi.com/Top_News/World-News/2026/07/16/eu-google-specification-requirements-ai-android/7631784213542/">EU orders Google to share data, Android with competitors - UPI</a></li>
-
-</ul>
-</details>
-
-**标签**: `#EU regulation`, `#antitrust`, `#Android`, `#Google`, `#AI assistants`
-
----
-
-<a id="item-13"></a>
-## [Truth Social 将向华尔街出售特朗普帖子的快速访问权限](https://www.cnn.com/2026/07/16/business/truth-social-data-wall-street) ⭐️ 8.0/10
-
-特朗普媒体科技集团（TMTG）宣布推出 Truth API 付费数据服务，从 8 月 1 日起向机构客户提供 Truth Social 上排名前 10 账户的毫秒级实时帖子访问。 这使得算法交易者能够比公众更快地对特朗普影响市场的言论做出反应，引发了对市场公平性、内幕交易以及总统商业与公共职责界限模糊的严重担忧。 Truth API 针对前 10 个账户的帖子，TMTG 未公布定价。CNN 此前报道特朗普曾利用 Truth Social 宣传他个人买入的股票。
-
-telegram · zaihuapd · 7月17日 01:02
-
-**背景**: Truth Social 是特朗普在被主要平台封禁后创建的社交媒体平台。高频交易（HFT）利用算法在毫秒级执行交易，通常依赖数据速度优势。通过出售特权数据访问，Truth Social 将其独家内容货币化，但批评者认为这给了金融内部人士不公平的优势。
-
-<details><summary>参考链接</summary>
-<ul>
-<li><a href="https://www.timesnownews.com/world/us/us-news/truth-api-explained-trump-media-new-service-gives-investors-faster-access-to-trump-posts-article-155113825">Truth API Explained: Trump Media New Service Gives Investors ...</a></li>
-<li><a href="https://marketchameleon.com/articles/b/2026/7/16/trump-media-launches-truth-api-institutional-market-impact">Trump Media Unveils Truth API: Real-Time Access to ...</a></li>
-<li><a href="https://zhuanlan.zhihu.com/p/20982511912">高频交易（HFT）：算法交易的闪电世界 - 知乎</a></li>
-
-</ul>
-</details>
-
-**标签**: `#social media`, `#algorithmic trading`, `#data monetization`, `#politics`, `#financial regulation`
+**标签**: `#open-source`, `#large language model`, `#AI`, `#deep learning`, `#model architecture`
 
 ---
