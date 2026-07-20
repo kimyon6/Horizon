@@ -6,70 +6,62 @@
     "base_url": "https://api.deepseek.com",
     "api_key_env": "DEEPSEEK_API_KEY",
     "temperature": 0.3,
-    "max_tokens": 8192,
-    "throttle_sec": 1,
+    "max_tokens": 2048,
+    "throttle_sec": 0,
     "languages": [
-      "zh",
-      "en"
+      "zh"
     ],
-    "analysis_concurrency": 5,
-    "enrichment_concurrency": 5
+    "analysis_concurrency": 3,
+    "enrichment_concurrency": 3
   },
   "sources": {
     "github": [
       {
-        "type": "user_events",
-        "username": "karpathy",
-        "enabled": true
+        "type": "repo_releases",
+        "owner": "openai",
+        "repo": "openai-python",
+        "enabled": true,
+        "category": "ai-tools"
       },
       {
         "type": "repo_releases",
-        "owner": "vllm-project",
-        "repo": "vllm",
-        "enabled": true
+        "owner": "langgenius",
+        "repo": "dify",
+        "enabled": true,
+        "category": "ai-tools"
       },
       {
         "type": "repo_releases",
-        "owner": "sgl-project",
-        "repo": "sglang",
-        "enabled": true
-      },
-      {
-        "type": "repo_releases",
-        "owner": "triton-lang",
-        "repo": "triton",
-        "enabled": true
+        "owner": "infiniflow",
+        "repo": "ragflow",
+        "enabled": true,
+        "category": "ai-tools"
       }
     ],
     "hackernews": {
-      "enabled": true,
-      "fetch_top_stories": 30,
-      "min_score": 150
+      "enabled": false,
+      "fetch_top_stories": 10,
+      "min_score": 100,
+      "category": "technology"
     },
     "rss": [
       {
         "name": "Simon Willison",
         "url": "https://simonwillison.net/atom/everything/",
         "enabled": true,
-        "category": "ai-tools"
+        "category": "ai-news"
       },
       {
         "name": "GitHub Trending - Daily",
         "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml",
-        "enabled": true,
+        "enabled": false,
         "category": "github-trending"
       },
       {
-        "name": "Semianalysis",
-        "url": "https://newsletter.semianalysis.com/feed",
-        "enabled": true,
-        "category": "semiconductors"
-      },
-      {
-        "name": "LWN.net",
-        "url": "https://lwn.net/headlines/full_text?key=${LWN_KEY}",
-        "enabled": true,
-        "category": "linux-kernel"
+        "name": "arXiv Artificial Intelligence",
+        "url": "https://rss.arxiv.org/rss/cs.AI",
+        "enabled": false,
+        "category": "ai-research"
       }
     ],
     "reddit": {
@@ -93,25 +85,43 @@
         }
       ],
       "users": [],
-      "fetch_comments": 10
+      "fetch_comments": 5
     },
     "telegram": {
-      "enabled": true,
-      "channels": [
-        {
-          "channel": "zaihuapd",
-          "enabled": true,
-          "fetch_limit": 20
-        }
-      ]
+      "enabled": false,
+      "channels": []
+    },
+    "google_news": {
+      "enabled": false,
+      "query": "artificial intelligence OR AI",
+      "language": "zh-CN",
+      "country": "CN",
+      "ceid": "CN:zh-Hans",
+      "max_results": 6,
+      "category": "ai-news"
     }
   },
   "filtering": {
-    "ai_score_threshold": 8.0,
-    "time_window_hours": 24
+    "ai_score_threshold": 7.0,
+    "time_window_hours": 24,
+    "max_items": 5,
+    "category_groups": {
+      "ai": {
+        "name": "AI 资讯",
+        "limit": 4,
+        "categories": ["ai-news", "ai-tools", "ai-research"]
+      },
+      "community": {
+        "name": "技术社区",
+        "limit": 1,
+        "categories": ["technology", "github-trending"]
+      }
+    },
+    "default_group": "other",
+    "default_group_limit": 1
   },
   "webhook": {
-    "enabled": true,
+    "enabled": false,
     "url_env": "HORIZON_WEBHOOK_URL",
     "delivery": "summary_and_items",
     "overview_position": "last",
