@@ -11,6 +11,7 @@ import re
 import sys
 import os
 from typing import List, Optional
+import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, MofNCompleteColumn
 from ddgs import DDGS
@@ -21,6 +22,7 @@ from .prompts import (
     CONTENT_ENRICHMENT_SYSTEM, CONTENT_ENRICHMENT_USER,
 )
 from .utils import parse_json_response
+from ..google_news_urls import is_google_news_url, resolve_google_news_url
 from ..models import ContentItem
 
 
@@ -29,6 +31,7 @@ class ContentEnricher:
 
     def __init__(self, ai_client: AIClient):
         self.client = ai_client
+        self._url_client: Optional[httpx.AsyncClient] = None
 
     def _get_concurrency(self) -> int:
         """Return the configured enrichment concurrency, clamped to 1 or above."""
@@ -65,7 +68,26 @@ class ContentEnricher:
             coros = [
                 _process(item, task) for item in items
             ]
-            await asyncio.gather(*coros)
+            async with httpx.AsyncClient(
+                timeout=15,
+                follow_redirects=True,
+                headers={"User-Agent": "Mozilla/5.0"},
+            ) as url_client:
+                self._url_client = url_client
+                try:
+                    await asyncio.gather(*coros)
+                finally:
+                    self._url_client = None
+
+    async def _resolve_article_url(self, item: ContentItem) -> None:
+        """Store a phone-friendly publisher URL for Google News items."""
+        source_url = str(item.url)
+        if not is_google_news_url(source_url):
+            return
+        resolved = await resolve_google_news_url(source_url, self._url_client)
+        if resolved:
+            item.metadata["google_news_url"] = source_url
+            item.metadata["resolved_url"] = resolved
 
     async def _web_search(self, query: str, max_results: int = 3) -> list:
         """Search the web for context via DuckDuckGo.
@@ -144,6 +166,9 @@ class ContentEnricher:
         Args:
             item: Content item to enrich (modified in-place via metadata)
         """
+        # Resolve Google News wrappers before rendering links or prompting the AI.
+        await self._resolve_article_url(item)
+
         # Extract content text and comments separately
         content_text = ""
         comments_text = ""
@@ -175,7 +200,7 @@ class ContentEnricher:
         # Step 3: AI generates background grounded in search results
         user_prompt = CONTENT_ENRICHMENT_USER.format(
             title=item.title,
-            url=str(item.url),
+            url=item.metadata.get("resolved_url") or str(item.url),
             summary=item.ai_summary or item.title,
             score=item.ai_score or 0,
             reason=item.ai_reason or "",

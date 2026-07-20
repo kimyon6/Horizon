@@ -29,7 +29,7 @@ The reader needs decision-useful information, not a generic news roundup.
 Score content on a 0-10 scale based on importance and relevance:
 
 **9-10: Immediate business impact** - Events likely to materially affect purchasing, sales, pricing, inventory, supply, regulation, or counterparty risk
-- Major iron ore, coking coal, coke, scrap, billet, rebar, or hot-rolled coil price/supply changes
+- Major physical-market iron ore, coking coal, coke, scrap, billet, rebar, or hot-rolled coil price/supply changes
 - Fujian Sangang pricing, production, maintenance, procurement, restructuring, or major announcements
 - Major steel production controls, environmental restrictions, tariffs, trade actions, supply disruptions, or national policies
 - Major regulation, safety incidents, supply shocks, or price moves involving Chinese medicinal ingredients, nourishing foods, food safety, or food-and-medicine products
@@ -54,6 +54,8 @@ Consider:
 - Reliability: official policies, company announcements, customs/industry data, and reports with concrete numbers rank above rumors or promotional claims
 - Novelty: score repeated coverage of an already-known event lower
 - Recency: if a newly indexed article mainly repeats an event, project, forecast, or policy from more than 30 days ago without a meaningful new development, score it 0-4
+- The reader already monitors futures prices. Routine intraday futures moves, main-contract quotes, percentage changes, opening/closing prices, technical alerts, and generic daily price tables must score 0-4 unless the article also reports a new physical-market event, policy, or supply-demand change
+- Physical coke/coking-coal negotiations are different from futures ticker news: coke price-cut or price-rise proposals (提降/提涨), acceptance/implementation (落地), round counts, mill purchase-price changes, and tender changes are decision-useful and should normally score 7-10 when reliably reported
 - Do not invent price direction or business impact when the article does not provide enough evidence
 """
 

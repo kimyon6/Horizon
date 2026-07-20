@@ -207,3 +207,43 @@ def test_generate_summary_preserves_normal_http_links():
     assert "[Important Item 1](https://example.com/items/1)" in result
     assert "[Discussion](https://example.com/discuss?id=1#comments)" in result
     assert 'href="https://docs.example.com/path?q=one&amp;lang=en"' in result
+
+
+def test_google_news_item_uses_resolved_publisher_article_url():
+    summarizer = DailySummarizer()
+    item = _make_item(1)
+    item.url = "https://news.google.com/rss/articles/wrapper-token?oc=5"
+    item.metadata.update(
+        {
+            "resolved_url": "https://finance.sina.com.cn/article/123.shtml",
+            "source_homepage": "https://finance.sina.com.cn",
+        }
+    )
+
+    result = summarizer.generate_webhook_item(item, "zh", 1, 1)
+
+    assert "https://finance.sina.com.cn/article/123.shtml" in result
+    assert "news.google.com" not in result
+
+
+def test_google_news_item_falls_back_to_publisher_homepage():
+    summarizer = DailySummarizer()
+    item = _make_item(1)
+    item.url = "https://news.google.com/rss/articles/wrapper-token?oc=5"
+    item.metadata["source_homepage"] = "https://finance.sina.com.cn"
+
+    result = summarizer.generate_webhook_item(item, "zh", 1, 1)
+
+    assert "[Important Item 1](https://finance.sina.com.cn)" in result
+    assert "news.google.com" not in result
+
+
+def test_google_news_item_without_fallback_has_no_broken_link():
+    summarizer = DailySummarizer()
+    item = _make_item(1)
+    item.url = "https://news.google.com/rss/articles/wrapper-token?oc=5"
+
+    result = summarizer.generate_webhook_item(item, "zh", 1, 1)
+
+    assert "## Important Item 1" in result
+    assert "news.google.com" not in result

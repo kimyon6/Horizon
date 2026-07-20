@@ -6,6 +6,7 @@ from typing import Dict, List, Optional
 from urllib.parse import quote, urlsplit
 
 from ..models import ContentItem
+from ..google_news_urls import is_google_news_url
 
 
 _CJK = r"[\u4e00-\u9fff\u3400-\u4dbf]"
@@ -36,6 +37,23 @@ def _safe_url(value: object) -> Optional[str]:
         return None
     encoded = quote(raw, safe=_URL_SAFE_CHARS)
     return html.escape(encoded, quote=True)
+
+
+def _reader_url(item: ContentItem) -> Optional[str]:
+    """Return a phone-friendly URL, never a Google News wrapper link."""
+    item_url = str(item.url)
+    if not is_google_news_url(item_url):
+        return _safe_url(item_url)
+
+    for candidate in (
+        item.metadata.get("resolved_url"),
+        item.metadata.get("source_homepage"),
+    ):
+        if candidate and not is_google_news_url(candidate):
+            safe = _safe_url(candidate)
+            if safe:
+                return safe
+    return None
 
 
 def _pangu(text: str) -> str:
@@ -172,7 +190,7 @@ class DailySummarizer:
             if language == "zh":
                 title = _pangu(title)
             score = item.ai_score or "?"
-            url = _safe_url(item.url)
+            url = _reader_url(item)
             title_link = f"[{title}]({url})" if url else title
             entries.append(f"{i}. {title_link} \u2b50\ufe0f {score}/10")
 
@@ -195,7 +213,7 @@ class DailySummarizer:
         _title = item.metadata.get(f"title_{language}") or item.title
         title = _escape_markdown(_title)
         raw_url = str(item.url)
-        url = _safe_url(raw_url)
+        url = _reader_url(item)
         score = item.ai_score or "?"
         meta = item.metadata
 
@@ -231,6 +249,8 @@ class DailySummarizer:
             source_parts.append(_escape_markdown(meta["feed_name"]))
         else:
             source_parts.append(_escape_markdown(item.author or "unknown"))
+        if meta.get("source_name") and meta.get("source_name") != meta.get("feed_name"):
+            source_parts.append(_escape_markdown(meta["source_name"]))
         if item.published_at:
             if language == "zh":
                 source_parts.append(

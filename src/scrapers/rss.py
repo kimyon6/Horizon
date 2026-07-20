@@ -105,6 +105,9 @@ class RSSScraper(BaseScraper):
 
                 # Extract content
                 content = self._extract_content(entry)
+                entry_source = entry.get("source") or {}
+                source_name = entry_source.get("title")
+                source_homepage = entry_source.get("href") or entry_source.get("url")
 
                 if source.content_extractor and self._extractors:
                     extractor = self._extractors.get(source.content_extractor)
@@ -124,9 +127,15 @@ class RSSScraper(BaseScraper):
                     author=entry.get("author", source.name),
                     published_at=published_at,
                     metadata={
-                        "feed_name": source.name,
-                        "category": source.category,
-                        "tags": [tag.term for tag in entry.get("tags", [])],
+                        key: value
+                        for key, value in {
+                            "feed_name": source.name,
+                            "source_name": source_name,
+                            "source_homepage": source_homepage,
+                            "category": source.category,
+                            "tags": [tag.term for tag in entry.get("tags", [])],
+                        }.items()
+                        if value is not None
                     },
                 )
                 items.append(item)

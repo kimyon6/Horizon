@@ -21,6 +21,18 @@ _FEED = """<?xml version="1.0" encoding="UTF-8" ?>
 """
 _SINCE = datetime(2026, 4, 24, 0, 0, tzinfo=timezone.utc)
 
+_GOOGLE_STYLE_FEED = """<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0"><channel><title>Google News</title>
+  <item>
+    <guid>google-entry-1</guid>
+    <title>焦炭价格暂稳运行 首轮提降开启 - 新浪财经</title>
+    <link>https://news.google.com/rss/articles/example-token?oc=5</link>
+    <pubDate>Fri, 24 Apr 2026 12:00:00 GMT</pubDate>
+    <source url="https://finance.sina.com.cn">新浪财经</source>
+  </item>
+</channel></rss>
+"""
+
 
 def _make_feed_client(feed_text: str) -> AsyncMock:
     response = MagicMock()
@@ -115,3 +127,16 @@ def test_source_max_items_caps_feed_results() -> None:
 
     assert len(items) == 1
     assert items[0].title == "Item 1"
+
+
+def test_rss_preserves_publisher_name_and_homepage() -> None:
+    client = _make_feed_client(_GOOGLE_STYLE_FEED)
+    source = RSSSourceConfig(
+        name="黑色原料新闻",
+        url="https://news.google.com/rss/search?q=coke",
+    )
+
+    item = asyncio.run(RSSScraper([source], client).fetch(_SINCE))[0]
+
+    assert item.metadata["source_name"] == "新浪财经"
+    assert item.metadata["source_homepage"] == "https://finance.sina.com.cn"

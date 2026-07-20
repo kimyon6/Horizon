@@ -152,7 +152,7 @@
     "request_body": {
       "msgtype": "markdown",
       "markdown": {
-        "content": "## Horizon经营新闻｜#{message_title}\n\n#{summary?limit=1200&split=---}\n\n[查看完整日报](https://kimyon6.github.io/Horizon/)"
+        "content": "## Horizon经营新闻｜#{message_title}\n\n#{summary?limit=1200&split=---}"
       }
     },
     "headers": ""

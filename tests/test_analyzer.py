@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 import src.ai.analyzer as analyzer_module
-from src.ai.analyzer import ContentAnalyzer
+from src.ai.analyzer import ContentAnalyzer, is_routine_futures_update
 from src.models import ContentItem, SourceType
 
 
@@ -119,6 +119,39 @@ def test_analyze_item_accepts_valid_result():
     assert item.ai_reason == "Relevant"
     assert item.ai_summary == "A useful update"
     assert item.ai_tags == ["ai", "research"]
+
+
+@pytest.mark.parametrize(
+    ("title", "expected"),
+    [
+        ("焦煤期货主力合约日内跌 3%至 1242 元", True),
+        ("铁矿石主力合约盘中上涨 2.1%", True),
+        ("焦炭价格暂稳运行 首轮提降开启", False),
+        ("煤矿事故影响焦煤期货主力合约盘中上涨", False),
+    ],
+)
+def test_routine_futures_update_detection(title, expected):
+    assert is_routine_futures_update(title) is expected
+
+
+def test_analyze_item_caps_routine_futures_quote_below_digest_threshold():
+    async def complete(**kwargs):
+        return json.dumps(
+            {
+                "score": 9.0,
+                "reason": "Large move",
+                "summary": "The main contract fell intraday.",
+                "tags": ["焦煤", "期货"],
+            }
+        )
+
+    item = _make_item("rss:test:futures")
+    item.title = "焦煤期货主力合约日内跌 3%至 1242 元"
+
+    asyncio.run(ContentAnalyzer(SimpleNamespace(complete=complete))._analyze_item(item))
+
+    assert item.ai_score == 4.0
+    assert item.ai_reason.startswith("常规期货行情已按用户偏好降权")
 
 
 @pytest.mark.parametrize(

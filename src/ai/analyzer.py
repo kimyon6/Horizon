@@ -15,6 +15,28 @@ from ..models import ContentItem
 
 DEFAULT_THROTTLE_SEC = 0.0
 
+_ROUTINE_FUTURES_UPDATE = re.compile(
+    r"(?:期货|主力(?:合约)?|连续合约|期价|盘面).{0,18}"
+    r"(?:日内|盘中|早盘|午盘|夜盘|开盘|收盘)?.{0,12}"
+    r"(?:涨|跌|上涨|下跌|拉升|跳水|走高|走低|报|收于|至)"
+    r"|(?:日内|盘中|早盘|午盘|夜盘|开盘|收盘).{0,18}"
+    r"(?:期货|主力(?:合约)?|连续合约|期价|盘面).{0,12}"
+    r"(?:涨|跌|上涨|下跌|拉升|跳水|走高|走低|报|收于|至)"
+)
+_PHYSICAL_OR_STRUCTURAL_SIGNAL = re.compile(
+    r"提降|提涨|落地|开启|接受|抵制|采购价|出厂价|调价|招标|"
+    r"停产|限产|检修|复产|事故|政策|关税|出口|进口|发运|到港|"
+    r"库存|需求|环保|利润|亏损|产能|减产|增产"
+)
+
+
+def is_routine_futures_update(title: str) -> bool:
+    """Identify price-ticker news that the reader already follows elsewhere."""
+    return bool(
+        _ROUTINE_FUTURES_UPDATE.search(title)
+        and not _PHYSICAL_OR_STRUCTURAL_SIGNAL.search(title)
+    )
+
 
 class AnalysisResult(BaseModel):
     """Validated structured result returned by the analysis model."""
@@ -170,7 +192,11 @@ class ContentAnalyzer:
             return
 
         # Update item with analysis results
-        item.ai_score = result.score
-        item.ai_reason = result.reason
+        if is_routine_futures_update(item.title):
+            item.ai_score = min(result.score, 4.0)
+            item.ai_reason = f"常规期货行情已按用户偏好降权；{result.reason}"
+        else:
+            item.ai_score = result.score
+            item.ai_reason = result.reason
         item.ai_summary = result.summary
         item.ai_tags = result.tags
