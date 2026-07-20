@@ -36,6 +36,7 @@ Score content on a 0-10 scale based on importance and relevance:
 
 **7-8: High business value** - Developments worth monitoring today
 - Port inventories, mine shipments, blast-furnace operations, steel-mill margins, production cuts, restocking, freight, or exchange-rate changes
+- Australian and global upstream supply signals: Pilbara mine output, Port Hedland/Dampier/Cape Lambert operations, Rio Tinto/BHP/Fortescue guidance and shipments, Western Australian cyclones, rail or port disruptions, Australian metallurgical coal, Vale/Brazil shipments, and Simandou/Guinea project changes
 - Real-estate, infrastructure, manufacturing PMI, automobile, machinery, shipbuilding, or export news that can change steel demand
 - Regional East China/Fujian steel-market changes, mill price adjustments, tendering, credit, logistics, or customer-demand signals
 - Herbal ingredient prices, origin supply, quality standards, food-safety enforcement, e-commerce rules, or consumer-demand trends
@@ -56,6 +57,8 @@ Consider:
 - Recency: if a newly indexed article mainly repeats an event, project, forecast, or policy from more than 30 days ago without a meaningful new development, score it 0-4
 - The reader already monitors futures prices. Routine intraday futures moves, main-contract quotes, percentage changes, opening/closing prices, technical alerts, and generic daily price tables must score 0-4 unless the article also reports a new physical-market event, policy, or supply-demand change
 - Physical coke/coking-coal negotiations are different from futures ticker news: coke price-cut or price-rise proposals (提降/提涨), acceptance/implementation (落地), round counts, mill purchase-price changes, and tender changes are decision-useful and should normally score 7-10 when reliably reported
+- For foreign-language news, assess the event's transmission path to Chinese import supply, landed cost, freight, steel-mill procurement, and bargaining expectations; translate the decision-useful facts into Simplified Chinese during enrichment
+- Corporate celebrations, generic ESG publicity, and old project background without a new production, shipment, cost, guidance, disruption, policy, or commissioning development should score 0-4
 - Do not invent price direction or business impact when the article does not provide enough evidence
 """
 

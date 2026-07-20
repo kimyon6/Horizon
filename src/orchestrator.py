@@ -224,6 +224,27 @@ class HorizonOrchestrator:
                     f"→ {len(merged_items)} unique items\n"
                 )
 
+            # Scheduled alert workflows restore this tiny file between fresh
+            # GitHub runners so an already delivered article is not sent again.
+            seen_filename = self.config.filtering.seen_state_filename
+            if seen_filename:
+                seen_ids = self.storage.load_seen_ids(
+                    seen_filename,
+                    self.config.filtering.seen_retention_hours,
+                )
+                before_seen_filter = len(merged_items)
+                merged_items = [item for item in merged_items if item.id not in seen_ids]
+                skipped = before_seen_filter - len(merged_items)
+                if skipped:
+                    self.console.print(
+                        f"🔕 Skipped {skipped} items already delivered in recent alerts\n"
+                    )
+                if not merged_items:
+                    self.console.print(
+                        "[yellow]No unseen content found. Exiting without notification.[/yellow]"
+                    )
+                    return
+
             # 4. Analyze with AI
             analyzed_items = await self._analyze_content(merged_items)
             self.console.print(f"🤖 Analyzed {len(analyzed_items)} items with AI\n")
@@ -315,6 +336,16 @@ class HorizonOrchestrator:
                         lang=lang,
                         summarizer=summarizer,
                     )
+
+            if seen_filename and important_items:
+                self.storage.mark_seen_ids(
+                    seen_filename,
+                    (item.id for item in important_items),
+                    self.config.filtering.seen_retention_hours,
+                )
+                self.console.print(
+                    f"🧾 Recorded {len(important_items)} delivered alert items for deduplication\n"
+                )
 
             self.console.print("[bold green]✅ Horizon completed successfully![/bold green]")
             usage = get_usage_snapshot()

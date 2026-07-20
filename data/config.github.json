@@ -53,6 +53,34 @@
         "max_items": 12
       },
       {
+        "name": "澳大利亚铁矿与矿山",
+        "url": "https://news.google.com/rss/search?q=%22iron+ore%22+%28Australia+OR+Pilbara+OR+%22Port+Hedland%22+OR+%22Rio+Tinto%22+OR+BHP+OR+Fortescue%29+when%3A1d&hl=en-AU&gl=AU&ceid=AU:en",
+        "enabled": true,
+        "category": "international-australia-ore",
+        "max_items": 6
+      },
+      {
+        "name": "西澳港口铁路与天气",
+        "url": "https://news.google.com/rss/search?q=%28Pilbara+OR+%22Port+Hedland%22+OR+Dampier+OR+%22Cape+Lambert%22%29+%28cyclone+OR+closure+OR+disruption+OR+rail+OR+port%29+%22iron+ore%22+when%3A1d&hl=en-AU&gl=AU&ceid=AU:en",
+        "enabled": true,
+        "category": "international-australia-disruption",
+        "max_items": 6
+      },
+      {
+        "name": "全球铁矿供应",
+        "url": "https://news.google.com/rss/search?q=%22iron+ore%22+%28Vale+OR+Brazil+OR+Simandou+OR+Guinea%29+%28shipment+OR+export+OR+production+OR+guidance+OR+disruption+OR+project%29+when%3A1d&hl=en&gl=US&ceid=US:en",
+        "enabled": true,
+        "category": "international-global-ore",
+        "max_items": 6
+      },
+      {
+        "name": "国际焦煤供应",
+        "url": "https://news.google.com/rss/search?q=%28%22coking+coal%22+OR+%22metallurgical+coal%22%29+%28Australia+OR+Queensland%29+%28supply+OR+export+OR+mine+OR+disruption+OR+production+OR+shipment%29+when%3A1d&hl=en-AU&gl=AU&ceid=AU:en",
+        "enabled": true,
+        "category": "international-coking-coal",
+        "max_items": 6
+      },
+      {
         "name": "福建三钢与钢材行情",
         "url": "https://news.google.com/rss/search?q=%E7%A6%8F%E5%BB%BA%E4%B8%89%E9%92%A2%20OR%20%E4%B8%89%E9%92%A2%E9%97%BD%E5%85%89%20OR%20%E9%92%A2%E6%9D%90%E4%BB%B7%E6%A0%BC%20OR%20%E9%92%A2%E5%8E%82%E8%B0%83%E4%BB%B7%20OR%20%E8%9E%BA%E7%BA%B9%E9%92%A2%20OR%20%E7%83%AD%E8%BD%A7%E5%8D%B7%E6%9D%BF%20OR%20%E9%92%A2%E5%9D%AF%20when%3A1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
         "enabled": true,
@@ -97,13 +125,23 @@
   "filtering": {
     "ai_score_threshold": 6.5,
     "time_window_hours": 24,
-    "max_items": 15,
+    "max_items": 18,
     "category_groups": {
       "upstream": {
         "name": "黑色原料",
         "limit": 4,
         "categories": [
           "steel-upstream"
+        ]
+      },
+      "international": {
+        "name": "国际铁矿与焦煤供应",
+        "limit": 3,
+        "categories": [
+          "international-australia-ore",
+          "international-australia-disruption",
+          "international-global-ore",
+          "international-coking-coal"
         ]
       },
       "steel": {

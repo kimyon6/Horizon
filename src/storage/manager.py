@@ -4,8 +4,9 @@ import json
 import os
 import re
 import shutil
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from pydantic import ValidationError
 
@@ -126,6 +127,69 @@ class StorageManager:
         _atomic_write_text(filepath, markdown)
 
         return filepath
+
+    def _load_seen_entries(self, filename: str) -> dict[str, str]:
+        path = safe_output_path(self.data_dir, filename)
+        if not path.exists():
+            return {}
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return {}
+        items = payload.get("items", {}) if isinstance(payload, dict) else {}
+        if not isinstance(items, dict):
+            return {}
+        return {
+            str(item_id): str(timestamp)
+            for item_id, timestamp in items.items()
+            if item_id and timestamp
+        }
+
+    @staticmethod
+    def _fresh_seen_entries(
+        entries: dict[str, str], retention_hours: int
+    ) -> dict[str, str]:
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=retention_hours)
+        fresh: dict[str, str] = {}
+        for item_id, raw_timestamp in entries.items():
+            try:
+                timestamp = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+                if timestamp.tzinfo is None:
+                    timestamp = timestamp.replace(tzinfo=timezone.utc)
+            except (TypeError, ValueError):
+                continue
+            if timestamp.astimezone(timezone.utc) >= cutoff:
+                fresh[item_id] = timestamp.astimezone(timezone.utc).isoformat()
+        return fresh
+
+    def load_seen_ids(self, filename: str, retention_hours: int = 168) -> set[str]:
+        """Load recently delivered item IDs from a small JSON state file."""
+        entries = self._fresh_seen_entries(
+            self._load_seen_entries(filename), retention_hours
+        )
+        return set(entries)
+
+    def mark_seen_ids(
+        self,
+        filename: str,
+        item_ids: Iterable[str],
+        retention_hours: int = 168,
+    ) -> Path:
+        """Record delivered item IDs while pruning expired history."""
+        path = safe_output_path(self.data_dir, filename)
+        entries = self._fresh_seen_entries(
+            self._load_seen_entries(filename), retention_hours
+        )
+        now = datetime.now(timezone.utc).isoformat()
+        for item_id in item_ids:
+            if item_id:
+                entries[str(item_id)] = now
+        _atomic_write_text(
+            path,
+            json.dumps({"version": 1, "items": entries}, ensure_ascii=False, indent=2)
+            + "\n",
+        )
+        return path
 
     def load_subscribers(self) -> list:
         """Loads the list of email subscribers."""

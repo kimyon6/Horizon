@@ -467,6 +467,9 @@ class WebhookNotifier:
         summarizer: DailySummarizer,
     ) -> List[dict[str, Any]]:
         """Build the variables for all webhook messages for one language."""
+        if not important_items and not getattr(self.config, "notify_when_empty", True):
+            return []
+
         webhook_languages = getattr(self.config, "languages", None)
         if webhook_languages and lang not in webhook_languages:
             return []

@@ -1,5 +1,6 @@
 import json
 import pytest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import src._file_utils as file_utils
 from src.storage.manager import StorageManager, ConfigError, _expand_env_vars, safe_output_path
@@ -153,6 +154,50 @@ def test_save_daily_summary_defensively_rejects_path_escape(tmp_path):
 def test_safe_output_path_rejects_escape_from_other_output_roots(tmp_path):
     with pytest.raises(ValueError, match="escapes intended root"):
         safe_output_path(tmp_path / "docs" / "_posts", "../../../outside.md")
+
+
+def test_seen_state_round_trip_and_merge(tmp_path):
+    storage = StorageManager(data_dir=str(tmp_path / "data"))
+
+    storage.mark_seen_ids("international-alert-seen.json", ["item-1", "item-2"])
+    storage.mark_seen_ids("international-alert-seen.json", ["item-3"])
+
+    assert storage.load_seen_ids("international-alert-seen.json") == {
+        "item-1",
+        "item-2",
+        "item-3",
+    }
+
+
+def test_seen_state_prunes_expired_and_invalid_entries(tmp_path):
+    storage = StorageManager(data_dir=str(tmp_path / "data"))
+    path = tmp_path / "data" / "international-alert-seen.json"
+    old = (datetime.now(timezone.utc) - timedelta(hours=200)).isoformat()
+    fresh = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "items": {
+                    "old": old,
+                    "fresh": fresh,
+                    "bad": "not-a-time",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert storage.load_seen_ids(
+        "international-alert-seen.json", retention_hours=168
+    ) == {"fresh"}
+
+
+def test_seen_state_filename_cannot_escape_data_directory(tmp_path):
+    storage = StorageManager(data_dir=str(tmp_path / "data"))
+
+    with pytest.raises(ValueError, match="escapes intended root"):
+        storage.mark_seen_ids("../outside.json", ["item-1"])
 
 
 def test_save_daily_summary_replace_failure_preserves_destination(tmp_path, monkeypatch):

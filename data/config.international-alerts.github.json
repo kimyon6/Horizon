@@ -1,0 +1,120 @@
+{
+  "version": "1.0",
+  "ai": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "base_url": "https://api.deepseek.com",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "temperature": 0.2,
+    "max_tokens": 3072,
+    "throttle_sec": 0,
+    "languages": ["zh"],
+    "analysis_concurrency": 3,
+    "enrichment_concurrency": 3
+  },
+  "sources": {
+    "github": [],
+    "hackernews": {
+      "enabled": false,
+      "fetch_top_stories": 10,
+      "min_score": 100,
+      "category": "technology"
+    },
+    "rss": [
+      {
+        "name": "澳大利亚铁矿与矿山",
+        "url": "https://news.google.com/rss/search?q=%22iron+ore%22+%28Australia+OR+Pilbara+OR+%22Port+Hedland%22+OR+%22Rio+Tinto%22+OR+BHP+OR+Fortescue%29+when%3A6h&hl=en-AU&gl=AU&ceid=AU:en",
+        "enabled": true,
+        "category": "international-australia-ore",
+        "max_items": 8
+      },
+      {
+        "name": "西澳港口铁路与天气",
+        "url": "https://news.google.com/rss/search?q=%28Pilbara+OR+%22Port+Hedland%22+OR+Dampier+OR+%22Cape+Lambert%22%29+%28cyclone+OR+closure+OR+disruption+OR+rail+OR+port%29+%22iron+ore%22+when%3A6h&hl=en-AU&gl=AU&ceid=AU:en",
+        "enabled": true,
+        "category": "international-australia-disruption",
+        "max_items": 6
+      },
+      {
+        "name": "全球铁矿供应",
+        "url": "https://news.google.com/rss/search?q=%22iron+ore%22+%28Vale+OR+Brazil+OR+Simandou+OR+Guinea%29+%28shipment+OR+export+OR+production+OR+guidance+OR+disruption+OR+project%29+when%3A6h&hl=en&gl=US&ceid=US:en",
+        "enabled": true,
+        "category": "international-global-ore",
+        "max_items": 6
+      },
+      {
+        "name": "国际焦煤供应",
+        "url": "https://news.google.com/rss/search?q=%28%22coking+coal%22+OR+%22metallurgical+coal%22%29+%28Australia+OR+Queensland%29+%28supply+OR+export+OR+mine+OR+disruption+OR+production+OR+shipment%29+when%3A6h&hl=en-AU&gl=AU&ceid=AU:en",
+        "enabled": true,
+        "category": "international-coking-coal",
+        "max_items": 6
+      }
+    ],
+    "reddit": {
+      "enabled": false,
+      "subreddits": [],
+      "users": [],
+      "fetch_comments": 0
+    },
+    "telegram": {
+      "enabled": false,
+      "channels": []
+    },
+    "google_news": {
+      "enabled": false,
+      "query": "iron ore",
+      "language": "en-AU",
+      "country": "AU",
+      "ceid": "AU:en",
+      "max_results": 6,
+      "category": "international-australia-ore"
+    }
+  },
+  "filtering": {
+    "ai_score_threshold": 8.0,
+    "time_window_hours": 6,
+    "max_items": 5,
+    "category_groups": {
+      "australia": {
+        "name": "澳大利亚铁矿供应",
+        "limit": 3,
+        "categories": [
+          "international-australia-ore",
+          "international-australia-disruption"
+        ]
+      },
+      "global": {
+        "name": "全球铁矿供应",
+        "limit": 1,
+        "categories": ["international-global-ore"]
+      },
+      "coal": {
+        "name": "国际焦煤供应",
+        "limit": 1,
+        "categories": ["international-coking-coal"]
+      }
+    },
+    "default_group": "other",
+    "default_group_limit": 1,
+    "seen_state_filename": "international-alert-seen.json",
+    "seen_retention_hours": 168
+  },
+  "webhook": {
+    "enabled": true,
+    "url_env": "HORIZON_WEBHOOK_URL",
+    "delivery": "summary_and_items",
+    "overview_position": "last",
+    "platform": "generic",
+    "layout": "markdown",
+    "fallback_layout": "markdown",
+    "languages": ["zh"],
+    "notify_when_empty": false,
+    "request_body": {
+      "msgtype": "markdown",
+      "markdown": {
+        "content": "## Horizon国际原料快讯｜#{message_title}\n\n#{summary?limit=1200&split=---}"
+      }
+    },
+    "headers": ""
+  }
+}

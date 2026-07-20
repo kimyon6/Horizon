@@ -1,0 +1,58 @@
+name: International Raw Materials Alerts
+
+on:
+  schedule:
+    # 10:17, 14:17, 18:17 and 22:17 in China (UTC+8).
+    # Minute 17 avoids GitHub's busiest top-of-hour scheduling window.
+    - cron: '17 2,6,10,14 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: horizon-international-alerts
+  cancel-in-progress: false
+
+jobs:
+  international-alerts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.26"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Restore delivered-news state
+        uses: actions/cache@v4
+        with:
+          path: data/international-alert-seen.json
+          key: horizon-international-alert-seen-${{ github.run_id }}
+          restore-keys: |
+            horizon-international-alert-seen-
+
+      - name: Initialize state file
+        run: |
+          if [ ! -f data/international-alert-seen.json ]; then
+            echo '{"version":1,"items":{}}' > data/international-alert-seen.json
+          fi
+
+      - name: Prepare international alerts config
+        run: cp data/config.international-alerts.github.json data/config.json
+
+      - name: Check and notify important international news
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK }}
+          HORIZON_WEBHOOK_URL: ${{ secrets.HORIZON_WEBHOOK_URL }}
+        run: uv run horizon --hours 6

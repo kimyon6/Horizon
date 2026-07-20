@@ -826,6 +826,30 @@ def _make_item(title="Test Item", url="https://example.com/test", score=8.0):
 
 
 class TestSendDailySummary:
+    def test_empty_alert_digest_can_skip_webhook(self):
+        os.environ[_TEST_URL_ENV] = _TEST_URL
+        config = WebhookConfig(
+            enabled=True,
+            url_env=_TEST_URL_ENV,
+            delivery="summary_and_items",
+            notify_when_empty=False,
+        )
+        notifier = WebhookNotifier(config)
+
+        with patch.object(notifier, "notify", new_callable=AsyncMock) as mock_notify:
+            _run_async(
+                notifier.send_daily_summary(
+                    summary="# Empty",
+                    important_items=[],
+                    all_items_count=10,
+                    date="2026-07-21",
+                    lang="zh",
+                    summarizer=DailySummarizer(),
+                )
+            )
+            mock_notify.assert_not_called()
+        del os.environ[_TEST_URL_ENV]
+
     def test_summary_delivery_calls_notify_once(self):
         """delivery='summary' sends a single notify call with message_kind='summary'."""
         os.environ[_TEST_URL_ENV] = _TEST_URL
