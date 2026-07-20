@@ -5,12 +5,10 @@
     "model": "deepseek-v4-flash",
     "base_url": "https://api.deepseek.com",
     "api_key_env": "DEEPSEEK_API_KEY",
-    "temperature": 0.3,
-    "max_tokens": 2048,
+    "temperature": 0.2,
+    "max_tokens": 3072,
     "throttle_sec": 0,
-    "languages": [
-      "zh"
-    ],
+    "languages": ["zh"],
     "analysis_concurrency": 3,
     "enrichment_concurrency": 3
   },
@@ -21,21 +19,21 @@
         "owner": "openai",
         "repo": "openai-python",
         "enabled": true,
-        "category": "ai-tools"
+        "category": "ai-business"
       },
       {
         "type": "repo_releases",
         "owner": "langgenius",
         "repo": "dify",
         "enabled": true,
-        "category": "ai-tools"
+        "category": "ai-business"
       },
       {
         "type": "repo_releases",
         "owner": "infiniflow",
         "repo": "ragflow",
         "enabled": true,
-        "category": "ai-tools"
+        "category": "ai-business"
       }
     ],
     "hackernews": {
@@ -46,46 +44,39 @@
     },
     "rss": [
       {
-        "name": "Simon Willison",
-        "url": "https://simonwillison.net/atom/everything/",
+        "name": "黑色原料新闻",
+        "url": "https://news.google.com/rss/search?q=%E9%93%81%E7%9F%BF%E7%9F%B3%20OR%20%E7%84%A6%E7%85%A4%20OR%20%E7%84%A6%E7%82%AD%20OR%20%E5%8F%8C%E7%84%A6%20OR%20%E5%BA%9F%E9%92%A2%20when%3A1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
         "enabled": true,
-        "category": "ai-news"
+        "category": "steel-upstream",
+        "max_items": 12
       },
       {
-        "name": "GitHub Trending - Daily",
-        "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml",
-        "enabled": false,
-        "category": "github-trending"
+        "name": "福建三钢与钢材行情",
+        "url": "https://news.google.com/rss/search?q=%E7%A6%8F%E5%BB%BA%E4%B8%89%E9%92%A2%20OR%20%E4%B8%89%E9%92%A2%E9%97%BD%E5%85%89%20OR%20%E9%92%A2%E6%9D%90%E4%BB%B7%E6%A0%BC%20OR%20%E9%92%A2%E5%8E%82%E8%B0%83%E4%BB%B7%20OR%20%E8%9E%BA%E7%BA%B9%E9%92%A2%20OR%20%E7%83%AD%E8%BD%A7%E5%8D%B7%E6%9D%BF%20OR%20%E9%92%A2%E5%9D%AF%20when%3A1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "steel-market",
+        "max_items": 12
       },
       {
-        "name": "arXiv Artificial Intelligence",
-        "url": "https://rss.arxiv.org/rss/cs.AI",
-        "enabled": false,
-        "category": "ai-research"
+        "name": "钢材需求与宏观影响",
+        "url": "https://news.google.com/rss/search?q=%E6%88%BF%E5%9C%B0%E4%BA%A7%E6%94%BF%E7%AD%96%20OR%20%E5%9F%BA%E5%BB%BA%E6%8A%95%E8%B5%84%20OR%20%E5%88%B6%E9%80%A0%E4%B8%9APMI%20OR%20%E9%92%A2%E6%9D%90%E5%87%BA%E5%8F%A3%20OR%20%E4%BA%BA%E6%B0%91%E5%B8%81%E6%B1%87%E7%8E%87%20OR%20%E6%B5%B7%E8%BF%90%E8%B4%B9%20OR%20%E6%B8%AF%E5%8F%A3%E5%BA%93%E5%AD%98%20OR%20%E7%8E%AF%E4%BF%9D%E9%99%90%E4%BA%A7%20OR%20%E7%B2%97%E9%92%A2%E5%8E%8B%E5%87%8F%20when%3A1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "steel-demand-macro",
+        "max_items": 10
+      },
+      {
+        "name": "滋补品与中药材经营",
+        "url": "https://news.google.com/rss/search?q=%E4%B8%AD%E8%8D%AF%E6%9D%90%E4%BB%B7%E6%A0%BC%20OR%20%E6%BB%8B%E8%A1%A5%E5%93%81%20OR%20%E8%8D%AF%E9%A3%9F%E5%90%8C%E6%BA%90%20OR%20%E4%BF%9D%E5%81%A5%E9%A3%9F%E5%93%81%20OR%20%E9%A3%9F%E5%93%81%E5%AE%89%E5%85%A8%20OR%20%E5%86%AC%E8%99%AB%E5%A4%8F%E8%8D%89%20OR%20%E9%B9%BF%E8%8C%B8%20when%3A1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "wellness-business",
+        "max_items": 10
       }
     ],
     "reddit": {
-      "enabled": true,
-      "subreddits": [
-        {
-          "subreddit": "MachineLearning",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 60
-        },
-        {
-          "subreddit": "LocalLLaMA",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 60
-        }
-      ],
+      "enabled": false,
+      "subreddits": [],
       "users": [],
-      "fetch_comments": 5
+      "fetch_comments": 0
     },
     "telegram": {
       "enabled": false,
@@ -98,23 +89,38 @@
       "country": "CN",
       "ceid": "CN:zh-Hans",
       "max_results": 6,
-      "category": "ai-news"
+      "category": "ai-business"
     }
   },
   "filtering": {
-    "ai_score_threshold": 7.0,
+    "ai_score_threshold": 6.5,
     "time_window_hours": 24,
-    "max_items": 5,
+    "max_items": 15,
     "category_groups": {
-      "ai": {
-        "name": "AI 资讯",
+      "upstream": {
+        "name": "黑色原料",
         "limit": 4,
-        "categories": ["ai-news", "ai-tools", "ai-research"]
+        "categories": ["steel-upstream"]
       },
-      "community": {
-        "name": "技术社区",
+      "steel": {
+        "name": "福建三钢与钢材行情",
+        "limit": 4,
+        "categories": ["steel-market"]
+      },
+      "macro": {
+        "name": "需求与宏观影响",
+        "limit": 3,
+        "categories": ["steel-demand-macro"]
+      },
+      "wellness": {
+        "name": "滋补品与中药材",
+        "limit": 3,
+        "categories": ["wellness-business"]
+      },
+      "ai": {
+        "name": "经营实用 AI",
         "limit": 1,
-        "categories": ["technology", "github-trending"]
+        "categories": ["ai-business"]
       }
     },
     "default_group": "other",
@@ -128,29 +134,19 @@
     "platform": "feishu",
     "layout": "collapsible",
     "fallback_layout": "markdown",
-    "languages": [
-      "zh"
-    ],
+    "languages": ["zh"],
     "request_body": {
       "msg_type": "interactive",
       "card": {
         "schema": "2.0",
-        "config": {
-          "wide_screen_mode": true
-        },
+        "config": {"wide_screen_mode": true},
         "header": {
-          "title": {
-            "tag": "plain_text",
-            "content": "#{message_title}"
-          },
+          "title": {"tag": "plain_text", "content": "#{message_title}"},
           "template": "blue"
         },
         "body": {
           "elements": [
-            {
-              "tag": "markdown",
-              "content": "#{summary}"
-            }
+            {"tag": "markdown", "content": "#{summary}"}
           ]
         }
       }

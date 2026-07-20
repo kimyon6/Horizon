@@ -2,7 +2,7 @@
 chcp 65001 >nul
 set "PYTHONUTF8=1"
 set "PYTHONIOENCODING=utf-8"
-set "OBSIDIAN_NEWS_DIR=C:\Users\Administrator\Documents\我的知识库\AI新闻日报"
+set "OBSIDIAN_NEWS_DIR=D:\kimyon\我的知识库\AI新闻日报"
 cd /d "%~dp0"
 
 if not exist ".venv\Scripts\horizon.exe" (
@@ -12,7 +12,7 @@ if not exist ".venv\Scripts\horizon.exe" (
   exit /b 1
 )
 
-echo 正在生成过去 24 小时的 AI 新闻日报，请稍候……
+echo 正在生成过去 24 小时的经营新闻日报，请稍候……
 echo.
 call ".venv\Scripts\horizon.exe" --hours 24
 

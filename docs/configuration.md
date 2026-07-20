@@ -274,12 +274,17 @@ All sources are configured under the top-level `sources` key in `config.json`.
         "name": "Blog Name",
         "url": "https://example.com/feed.xml",
         "enabled": true,
-        "category": "ai-ml"
+        "category": "ai-ml",
+        "max_items": 20
       }
     ]
   }
 }
 ```
+
+`max_items` is optional. When set, Horizon takes at most that many recent
+entries from this feed per run. This is useful for busy search feeds and helps
+control AI analysis time and token usage.
 
 ### Reddit
 
