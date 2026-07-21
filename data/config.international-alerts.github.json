@@ -22,29 +22,50 @@
     },
     "rss": [
       {
+        "name": "国内黑色原料快讯",
+        "url": "https://news.google.com/rss/search?q=%E9%93%81%E7%9F%BF%E7%9F%B3%20OR%20%E7%84%A6%E7%85%A4%20OR%20%E7%84%A6%E7%82%AD%20OR%20%E5%8F%8C%E7%84%A6%20OR%20%E5%BA%9F%E9%92%A2%20when%3A1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "steel-upstream",
+        "max_items": 10
+      },
+      {
+        "name": "福建三钢与钢厂调价",
+        "url": "https://news.google.com/rss/search?q=%E7%A6%8F%E5%BB%BA%E4%B8%89%E9%92%A2%20OR%20%E4%B8%89%E9%92%A2%E9%97%BD%E5%85%89%20OR%20%E9%92%A2%E5%8E%82%E8%B0%83%E4%BB%B7%20OR%20%E7%84%A6%E7%82%AD%E6%8F%90%E9%99%8D%20OR%20%E7%84%A6%E7%82%AD%E6%8F%90%E6%B6%A8%20OR%20%E9%99%90%E4%BA%A7%20OR%20%E6%A3%80%E4%BF%AE%20when%3A1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "steel-market",
+        "max_items": 10
+      },
+      {
+        "name": "钢铁政策与需求快讯",
+        "url": "https://news.google.com/rss/search?q=%E7%B2%97%E9%92%A2%E5%8E%8B%E5%87%8F%20OR%20%E9%92%A2%E6%9D%90%E5%87%BA%E5%8F%A3%E5%85%B3%E7%A8%8E%20OR%20%E7%8E%AF%E4%BF%9D%E9%99%90%E4%BA%A7%20OR%20%E6%88%BF%E5%9C%B0%E4%BA%A7%E6%94%BF%E7%AD%96%20OR%20%E5%9F%BA%E5%BB%BA%E9%87%8D%E5%A4%A7%E9%A1%B9%E7%9B%AE%20when%3A1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "steel-demand-macro",
+        "max_items": 6
+      },
+      {
         "name": "澳大利亚铁矿与矿山",
-        "url": "https://news.google.com/rss/search?q=%22iron+ore%22+%28Australia+OR+Pilbara+OR+%22Port+Hedland%22+OR+%22Rio+Tinto%22+OR+BHP+OR+Fortescue%29+when%3A6h&hl=en-AU&gl=AU&ceid=AU:en",
+        "url": "https://news.google.com/rss/search?q=%22iron+ore%22+%28Australia+OR+Pilbara+OR+%22Port+Hedland%22+OR+%22Rio+Tinto%22+OR+BHP+OR+Fortescue%29+when%3A1d&hl=en-AU&gl=AU&ceid=AU:en",
         "enabled": true,
         "category": "international-australia-ore",
         "max_items": 8
       },
       {
         "name": "西澳港口铁路与天气",
-        "url": "https://news.google.com/rss/search?q=%28Pilbara+OR+%22Port+Hedland%22+OR+Dampier+OR+%22Cape+Lambert%22%29+%28cyclone+OR+closure+OR+disruption+OR+rail+OR+port%29+%22iron+ore%22+when%3A6h&hl=en-AU&gl=AU&ceid=AU:en",
+        "url": "https://news.google.com/rss/search?q=%28Pilbara+OR+%22Port+Hedland%22+OR+Dampier+OR+%22Cape+Lambert%22%29+%28cyclone+OR+closure+OR+disruption+OR+rail+OR+port%29+%22iron+ore%22+when%3A1d&hl=en-AU&gl=AU&ceid=AU:en",
         "enabled": true,
         "category": "international-australia-disruption",
         "max_items": 6
       },
       {
         "name": "全球铁矿供应",
-        "url": "https://news.google.com/rss/search?q=%22iron+ore%22+%28Vale+OR+Brazil+OR+Simandou+OR+Guinea%29+%28shipment+OR+export+OR+production+OR+guidance+OR+disruption+OR+project%29+when%3A6h&hl=en&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=%22iron+ore%22+%28Vale+OR+Brazil+OR+Simandou+OR+Guinea%29+%28shipment+OR+export+OR+production+OR+guidance+OR+disruption+OR+project%29+when%3A1d&hl=en&gl=US&ceid=US:en",
         "enabled": true,
         "category": "international-global-ore",
         "max_items": 6
       },
       {
         "name": "国际焦煤供应",
-        "url": "https://news.google.com/rss/search?q=%28%22coking+coal%22+OR+%22metallurgical+coal%22%29+%28Australia+OR+Queensland%29+%28supply+OR+export+OR+mine+OR+disruption+OR+production+OR+shipment%29+when%3A6h&hl=en-AU&gl=AU&ceid=AU:en",
+        "url": "https://news.google.com/rss/search?q=%28%22coking+coal%22+OR+%22metallurgical+coal%22%29+%28Australia+OR+Queensland%29+%28supply+OR+export+OR+mine+OR+disruption+OR+production+OR+shipment%29+when%3A1d&hl=en-AU&gl=AU&ceid=AU:en",
         "enabled": true,
         "category": "international-coking-coal",
         "max_items": 6
@@ -72,9 +93,25 @@
   },
   "filtering": {
     "ai_score_threshold": 8.0,
-    "time_window_hours": 6,
-    "max_items": 5,
+    "time_window_hours": 24,
+    "max_items": 6,
+    "current_day_only": true,
     "category_groups": {
+      "upstream": {
+        "name": "国内黑色原料",
+        "limit": 2,
+        "categories": ["steel-upstream"]
+      },
+      "steel": {
+        "name": "福建三钢与钢厂动态",
+        "limit": 2,
+        "categories": ["steel-market"]
+      },
+      "macro": {
+        "name": "钢铁政策与需求",
+        "limit": 1,
+        "categories": ["steel-demand-macro"]
+      },
       "australia": {
         "name": "澳大利亚铁矿供应",
         "limit": 3,
@@ -97,7 +134,8 @@
     "default_group": "other",
     "default_group_limit": 1,
     "seen_state_filename": "international-alert-seen.json",
-    "seen_retention_hours": 168
+    "seen_retention_hours": 168,
+    "seen_mark_processed": true
   },
   "webhook": {
     "enabled": true,
@@ -112,7 +150,7 @@
     "request_body": {
       "msgtype": "markdown",
       "markdown": {
-        "content": "## Horizon国际原料快讯｜#{message_title}\n\n#{summary?limit=1200&split=---}"
+        "content": "## Horizon钢材实时快讯｜#{message_title}\n\n#{summary?limit=1200&split=---}"
       }
     },
     "headers": ""

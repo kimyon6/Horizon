@@ -31,6 +31,37 @@ from .ai.enricher import ContentEnricher
 from .ai.tokens import get_usage_snapshot
 
 
+_BEIJING_TIMEZONE = timezone(timedelta(hours=8))
+
+
+def _beijing_today(now: Optional[datetime] = None) -> str:
+    """Return the current Beijing calendar date as YYYY-MM-DD."""
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    return current.astimezone(_BEIJING_TIMEZONE).strftime("%Y-%m-%d")
+
+
+def keep_current_beijing_day(
+    items: List[ContentItem],
+    now: Optional[datetime] = None,
+) -> List[ContentItem]:
+    """Keep only articles whose publication date is today in Beijing."""
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    today = current.astimezone(_BEIJING_TIMEZONE).date()
+
+    kept: List[ContentItem] = []
+    for item in items:
+        published_at = item.published_at
+        if published_at.tzinfo is None:
+            published_at = published_at.replace(tzinfo=timezone.utc)
+        if published_at.astimezone(_BEIJING_TIMEZONE).date() == today:
+            kept.append(item)
+    return kept
+
+
 _TRACKING_QUERY_PARAMETERS = {
     "_ga",
     "dclid",
@@ -224,6 +255,23 @@ class HorizonOrchestrator:
                     f"→ {len(merged_items)} unique items\n"
                 )
 
+            # Compare calendar dates in UTC+8 so an article published yesterday
+            # is never presented as today's trading news.
+            if self.config.filtering.current_day_only:
+                before_day_filter = len(merged_items)
+                merged_items = keep_current_beijing_day(merged_items)
+                skipped = before_day_filter - len(merged_items)
+                if skipped:
+                    self.console.print(
+                        f"Skipped {skipped} articles not published today in Beijing\n"
+                    )
+                if not merged_items:
+                    self.console.print(
+                        "[yellow]No articles published today in Beijing. "
+                        "Exiting without notification.[/yellow]"
+                    )
+                    return
+
             # Scheduled alert workflows restore this tiny file between fresh
             # GitHub runners so an already delivered article is not sent again.
             seen_filename = self.config.filtering.seen_state_filename
@@ -244,6 +292,8 @@ class HorizonOrchestrator:
                         "[yellow]No unseen content found. Exiting without notification.[/yellow]"
                     )
                     return
+
+            processed_item_ids = [item.id for item in merged_items]
 
             # 4. Analyze with AI
             analyzed_items = await self._analyze_content(merged_items)
@@ -275,7 +325,7 @@ class HorizonOrchestrator:
             await self._enrich_important_items(important_items)
 
             # 7. Generate and save daily summaries for each configured language
-            today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            today = _beijing_today()
             for lang in self.config.ai.languages:
                 summarizer = DailySummarizer()
                 summary = await summarizer.generate_summary(important_items, today, len(all_items), language=lang)
@@ -337,14 +387,23 @@ class HorizonOrchestrator:
                         summarizer=summarizer,
                     )
 
-            if seen_filename and important_items:
+            if seen_filename:
+                seen_item_ids = (
+                    processed_item_ids
+                    if self.config.filtering.seen_mark_processed
+                    else [item.id for item in important_items]
+                )
+            else:
+                seen_item_ids = []
+
+            if seen_filename and seen_item_ids:
                 self.storage.mark_seen_ids(
                     seen_filename,
-                    (item.id for item in important_items),
+                    seen_item_ids,
                     self.config.filtering.seen_retention_hours,
                 )
                 self.console.print(
-                    f"🧾 Recorded {len(important_items)} delivered alert items for deduplication\n"
+                    f"🧾 Recorded {len(seen_item_ids)} processed alert items for deduplication\n"
                 )
 
             self.console.print("[bold green]✅ Horizon completed successfully![/bold green]")
@@ -369,7 +428,7 @@ class HorizonOrchestrator:
             # Send webhook failure notification if configured
             if self.webhook_notifier:
                 await self.webhook_notifier.send_failure(
-                    date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                    date=_beijing_today(),
                     error_message=str(e),
                 )
 

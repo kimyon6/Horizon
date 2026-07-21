@@ -489,8 +489,10 @@ class FilteringConfig(BaseModel):
     category_groups: Dict[str, CategoryGroupConfig] = Field(default_factory=dict)
     default_group: str = "other"
     default_group_limit: Optional[int] = Field(default=None, gt=0)
+    current_day_only: bool = False
     seen_state_filename: Optional[str] = None
     seen_retention_hours: int = Field(default=168, gt=0)
+    seen_mark_processed: bool = False
 
 
 class Config(BaseModel):

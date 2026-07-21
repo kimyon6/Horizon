@@ -97,6 +97,7 @@
     "ai_score_threshold": 6.5,
     "time_window_hours": 24,
     "max_items": 14,
+    "current_day_only": true,
     "category_groups": {
       "upstream": {
         "name": "黑色原料",

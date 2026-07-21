@@ -1,10 +1,10 @@
-name: International Raw Materials Alerts
+name: Realtime Steel Market Alerts
 
 on:
   schedule:
-    # 10:17, 14:17, 18:17 and 22:17 in China (UTC+8).
-    # Minute 17 avoids GitHub's busiest top-of-hour scheduling window.
-    - cron: '17 2,6,10,14 * * *'
+    # Every 30 minutes, around the clock. GitHub uses UTC; Beijing is UTC+8.
+    # Minutes 7 and 37 avoid the busiest top-of-hour scheduling window.
+    - cron: '7,37 * * * *'
   workflow_dispatch:
 
 concurrency:
@@ -48,11 +48,11 @@ jobs:
             echo '{"version":1,"items":{}}' > data/international-alert-seen.json
           fi
 
-      - name: Prepare international alerts config
+      - name: Prepare realtime steel alerts config
         run: cp data/config.international-alerts.github.json data/config.json
 
-      - name: Check and notify important international news
+      - name: Check and notify important same-day steel news
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK }}
           HORIZON_WEBHOOK_URL: ${{ secrets.HORIZON_WEBHOOK_URL }}
-        run: uv run horizon --hours 6
+        run: uv run horizon --hours 24
