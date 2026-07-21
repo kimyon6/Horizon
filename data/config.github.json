@@ -15,29 +15,7 @@
     "enrichment_concurrency": 3
   },
   "sources": {
-    "github": [
-      {
-        "type": "repo_releases",
-        "owner": "openai",
-        "repo": "openai-python",
-        "enabled": true,
-        "category": "ai-business"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "langgenius",
-        "repo": "dify",
-        "enabled": true,
-        "category": "ai-business"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "infiniflow",
-        "repo": "ragflow",
-        "enabled": true,
-        "category": "ai-business"
-      }
-    ],
+    "github": [],
     "hackernews": {
       "enabled": false,
       "fetch_top_stories": 10,
@@ -93,13 +71,6 @@
         "enabled": true,
         "category": "steel-demand-macro",
         "max_items": 10
-      },
-      {
-        "name": "滋补品与中药材经营",
-        "url": "https://news.google.com/rss/search?q=%E4%B8%AD%E8%8D%AF%E6%9D%90%E4%BB%B7%E6%A0%BC%20OR%20%E6%BB%8B%E8%A1%A5%E5%93%81%20OR%20%E8%8D%AF%E9%A3%9F%E5%90%8C%E6%BA%90%20OR%20%E4%BF%9D%E5%81%A5%E9%A3%9F%E5%93%81%20OR%20%E9%A3%9F%E5%93%81%E5%AE%89%E5%85%A8%20OR%20%E5%86%AC%E8%99%AB%E5%A4%8F%E8%8D%89%20OR%20%E9%B9%BF%E8%8C%B8%20when%3A1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
-        "enabled": true,
-        "category": "wellness-business",
-        "max_items": 10
       }
     ],
     "reddit": {
@@ -125,7 +96,7 @@
   "filtering": {
     "ai_score_threshold": 6.5,
     "time_window_hours": 24,
-    "max_items": 18,
+    "max_items": 14,
     "category_groups": {
       "upstream": {
         "name": "黑色原料",
@@ -156,20 +127,6 @@
         "limit": 3,
         "categories": [
           "steel-demand-macro"
-        ]
-      },
-      "wellness": {
-        "name": "滋补品与中药材",
-        "limit": 3,
-        "categories": [
-          "wellness-business"
-        ]
-      },
-      "ai": {
-        "name": "经营实用 AI",
-        "limit": 1,
-        "categories": [
-          "ai-business"
         ]
       }
     },

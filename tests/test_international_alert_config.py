@@ -4,6 +4,23 @@ from pathlib import Path
 from src.models import Config
 
 
+def test_daily_github_config_contains_only_steel_business_sources() -> None:
+    path = Path("data/config.github.json")
+    config = Config.model_validate(json.loads(path.read_text(encoding="utf-8")))
+
+    assert config.sources.github == []
+    categories = {feed.category for feed in config.sources.rss if feed.enabled}
+    assert "wellness-business" not in categories
+    assert "ai-business" not in categories
+    assert set(config.filtering.category_groups) == {
+        "upstream",
+        "international",
+        "steel",
+        "macro",
+    }
+    assert config.filtering.max_items == 14
+
+
 def test_international_alert_config_is_valid_and_strict() -> None:
     path = Path("data/config.international-alerts.github.json")
     config = Config.model_validate(json.loads(path.read_text(encoding="utf-8")))

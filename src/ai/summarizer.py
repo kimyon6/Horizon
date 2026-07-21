@@ -288,16 +288,20 @@ class DailySummarizer:
             reference_items = []
             for source in sources:
                 reference_title = html.escape(str(source.get("title", "")), quote=True)
-                reference_url = _safe_url(source.get("url", ""))
+                raw_reference_url = source.get("url", "")
+                if is_google_news_url(raw_reference_url):
+                    continue
+                reference_url = _safe_url(raw_reference_url)
                 if reference_url:
                     reference_items.append(f'<li><a href="{reference_url}">{reference_title}</a></li>\n')
                 else:
                     reference_items.append(f"<li>{reference_title}</li>\n")
-            items_html = "".join(reference_items)
-            lines += [
-                "",
-                f'<details><summary>{labels["references"]}</summary>\n<ul>\n{items_html}\n</ul>\n</details>',
-            ]
+            if reference_items:
+                items_html = "".join(reference_items)
+                lines += [
+                    "",
+                    f'<details><summary>{labels["references"]}</summary>\n<ul>\n{items_html}\n</ul>\n</details>',
+                ]
 
         if discussion:
             lines.append("")

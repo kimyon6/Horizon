@@ -247,3 +247,23 @@ def test_google_news_item_without_fallback_has_no_broken_link():
 
     assert "## Important Item 1" in result
     assert "news.google.com" not in result
+
+
+def test_google_news_reference_links_are_omitted() -> None:
+    summarizer = DailySummarizer()
+    item = _make_item(1)
+    item.metadata["sources"] = [
+        {
+            "title": "Google wrapper",
+            "url": "https://news.google.com/stories/wrapper-token",
+        },
+        {
+            "title": "Direct publisher",
+            "url": "https://www.riotinto.com/news/release",
+        },
+    ]
+
+    result = summarizer.generate_webhook_item(item, "zh", 1, 1)
+
+    assert "news.google.com" not in result
+    assert "https://www.riotinto.com/news/release" in result
