@@ -119,7 +119,7 @@ def test_generate_summary_zh_uses_localized_selection_header_and_numeric_date():
     )
 
     assert "> 从 10 条内容中筛选出 1 条重要资讯。" in result
-    assert "rss · tester · 4月25日 08:00" in result
+    assert "rss · tester · 4月25日 16:00 北京时间" in result
     assert "From 10 items" not in result
     assert "Apr 25, 08:00" not in result
 

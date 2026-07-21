@@ -2,6 +2,7 @@
 
 import html
 import re
+from datetime import timedelta, timezone
 from typing import Dict, List, Optional
 from urllib.parse import quote, urlsplit
 
@@ -253,9 +254,13 @@ class DailySummarizer:
             source_parts.append(_escape_markdown(meta["source_name"]))
         if item.published_at:
             if language == "zh":
+                published_at = item.published_at
+                if published_at.tzinfo is None:
+                    published_at = published_at.replace(tzinfo=timezone.utc)
+                published_at = published_at.astimezone(timezone(timedelta(hours=8)))
                 source_parts.append(
-                    f"{item.published_at.month}月{item.published_at.day}日 "
-                    f"{item.published_at:%H:%M}"
+                    f"{published_at.month}月{published_at.day}日 "
+                    f"{published_at:%H:%M} 北京时间"
                 )
             else:
                 day = item.published_at.strftime("%d").lstrip("0")
