@@ -235,6 +235,10 @@ class ContentEnricher:
             .astimezone(timezone(timedelta(hours=8)))
             .date()
             .isoformat(),
+            market_context=item.metadata.get(
+                "market_context_zh",
+                "No deterministic market-scope signal.",
+            ),
             summary=item.ai_summary or item.title,
             score=item.ai_score or 0,
             reason=item.ai_reason or "",

@@ -72,6 +72,13 @@ LABELS = {
         "discussion": "Discussion",
         "references": "References",
         "tags": "Tags",
+        "original_title": "Original headline",
+        "ai_translation": "AI translation (not original text)",
+        "market_scope": "Market scope (rule-based check)",
+        "ai_analysis": "AI analysis (not original text)",
+        "original_source": "Original source",
+        "ai_background": "AI background (not original text)",
+        "ai_tags": "AI tags",
         "selected_items": "From {total} items, {selected} important content pieces were selected",
         "empty_analyzed": "Analyzed {total} items, but none met the importance threshold.",
         "empty_body": (
@@ -92,6 +99,13 @@ LABELS = {
         "discussion": "社区讨论",
         "references": "参考链接",
         "tags": "标签",
+        "original_title": "原文标题",
+        "ai_translation": "AI 中文译题（非原文）",
+        "market_scope": "行情口径（程序核对）",
+        "ai_analysis": "AI 解读（非原文）",
+        "original_source": "原文来源",
+        "ai_background": "AI 背景（非原文）",
+        "ai_tags": "AI 标签",
         "selected_items": "从 {total} 条内容中筛选出 {selected} 条重要资讯。",
         "empty_analyzed": "已分析 {total} 条内容，但没有达到重要性阈值的条目。",
         "empty_body": (
@@ -148,7 +162,7 @@ class DailySummarizer:
         # TOC
         toc_entries = []
         for i, item in enumerate(items):
-            _t = item.metadata.get(f"title_{language}") or item.title
+            _t = item.title
             t = _escape_markdown(_t)
             if language == "zh":
                 t = _pangu(t)
@@ -187,7 +201,7 @@ class DailySummarizer:
 
         entries = []
         for i, item in enumerate(items, start=1):
-            title = _escape_markdown(item.metadata.get(f"title_{language}") or item.title)
+            title = _escape_markdown(item.title)
             if language == "zh":
                 title = _pangu(title)
             score = item.ai_score or "?"
@@ -211,12 +225,18 @@ class DailySummarizer:
 
     def _format_item(self, item: ContentItem, labels: dict, language: str, index: int) -> str:
         """Format a single ContentItem into Markdown."""
-        _title = item.metadata.get(f"title_{language}") or item.title
+        _title = item.title
         title = _escape_markdown(_title)
         raw_url = str(item.url)
         url = _reader_url(item)
         score = item.ai_score or "?"
         meta = item.metadata
+        separator = "：" if language == "zh" else ": "
+        ai_translation = ""
+        if language == "zh" and not re.search(_CJK, str(item.title)):
+            translated = meta.get("title_zh")
+            if translated and str(translated).strip() != str(item.title).strip():
+                ai_translation = _pangu(_escape_markdown(translated))
 
         summary = (
             meta.get(f"detailed_summary_{language}")
@@ -277,16 +297,32 @@ class DailySummarizer:
 
         lines = [
             f'<a id="item-{index}"></a>',
-            f"## {title_link} \u2b50\ufe0f {score}/10",  # ⭐️
+            f"## {labels['original_title']}{separator}{title_link} \u2b50\ufe0f {score}/10",  # ⭐️
             "",
-            summary,
-            "",
-            source_line,
         ]
+
+        if ai_translation:
+            lines.append(f"**{labels['ai_translation']}**{separator}{ai_translation}")
+            lines.append("")
+
+        market_context = meta.get("market_context_zh") if language == "zh" else ""
+        if market_context:
+            lines.append(
+                f"**{labels['market_scope']}**{separator}{_pangu(_escape_markdown(market_context))}"
+            )
+            lines.append("")
+
+        lines.extend(
+            [
+                f"**{labels['ai_analysis']}**{separator}{summary}",
+                "",
+                f"**{labels['original_source']}**{separator}{source_line}",
+            ]
+        )
 
         if background:
             lines.append("")
-            lines.append(f"**{labels['background']}**: {background}")
+            lines.append(f"**{labels['ai_background']}**{separator}{background}")
 
         sources = meta.get("sources") or []
         if sources:
@@ -315,7 +351,7 @@ class DailySummarizer:
         if item.ai_tags:
             tags_str = ", ".join([f"`#{_escape_markdown(t)}`" for t in item.ai_tags])
             lines.append("")
-            lines.append(f"**{labels['tags']}**: {tags_str}")
+            lines.append(f"**{labels['ai_tags']}**{separator}{tags_str}")
 
         lines.append("")
         lines.append("---")

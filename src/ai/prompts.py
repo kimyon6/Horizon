@@ -59,6 +59,8 @@ Consider:
 - Never invent or infer a calendar year that is absent from the title and content. Keep wording such as "second quarter" yearless when the year is not explicitly supported.
 - If the source explicitly concerns an old period and reports no genuinely new announcement today, score it 0-4 even when the feed publication time is today.
 - The reader already monitors futures prices. Routine intraday futures moves, main-contract quotes, percentage changes, opening/closing prices, technical alerts, and generic daily price tables must score 0-4 unless the article also reports a new physical-market event, policy, or supply-demand change
+- Never describe a futures-contract rebound as a rise in physical coke, coking-coal, iron-ore, or steel prices. Name the exact instrument and market whenever describing a move.
+- Distinguish a coke price-rise/price-cut proposal (提涨/提降), mill acceptance, and implementation (落地/执行). A proposal is not a completed physical price change.
 - Physical coke/coking-coal negotiations are different from futures ticker news: coke price-cut or price-rise proposals (提降/提涨), acceptance/implementation (落地), round counts, mill purchase-price changes, and tender changes are decision-useful and should normally score 7-10 when reliably reported
 - For foreign-language news, assess the event's transmission path to Chinese import supply, landed cost, freight, steel-mill procurement, and bargaining expectations; translate the decision-useful facts into Simplified Chinese during enrichment
 - Corporate celebrations, generic ESG publicity, and old project background without a new production, shipment, cost, guidance, disruption, policy, or commissioning development should score 0-4
@@ -78,6 +80,7 @@ Author: {author}
 URL: {url}
 Feed publication time: {published_at}
 Current date in Beijing: {current_date}
+Programmatic market-scope check: {market_context}
 {content_section}
 {discussion_section}
 
@@ -142,6 +145,8 @@ Guidelines:
 - Treat the feed publication time and the event/reporting period as different facts.
 - Never add a specific year to an ambiguous period such as "second quarter" unless the title/content states it or at least two supplied search results independently confirm it. If uncertain, preserve the period without a year.
 - Do not repeat an older similarly worded report when the headline-verification results identify a current report.
+- Never merge a futures move with a physical-market move. If futures rebounded while mills cut physical coke procurement prices, state both separately and put the physical-market fact first.
+- A proposed 提涨/提降 is not an implemented price change. Use 落地/执行 only when the source confirms acceptance or implementation.
 - Distinguish confirmed facts from forecasts, opinions, rumors, and market expectations
 - Do not give a buy/sell instruction; provide evidence, likely business transmission paths, and uncertainties
 - ONLY explain concepts and terms that are explicitly mentioned in the title, summary, or content
@@ -157,6 +162,7 @@ CONTENT_ENRICHMENT_USER = """Provide a structured bilingual analysis for the fol
 - URL: {url}
 - Feed publication time: {published_at}
 - Current date in Beijing: {current_date}
+- Programmatic market-scope check: {market_context}
 - One-line summary: {summary}
 - Score: {score}/10
 - Reason: {reason}

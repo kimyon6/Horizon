@@ -13,6 +13,7 @@ from .client import AIClient
 from .prompts import CONTENT_ANALYSIS_SYSTEM, CONTENT_ANALYSIS_USER
 from .utils import parse_json_response
 from .grounding import extract_years, remove_unsupported_years
+from .market_context import market_context_notes
 from ..models import ContentItem
 
 DEFAULT_THROTTLE_SEC = 0.0
@@ -119,6 +120,10 @@ class ContentAnalyzer:
         Args:
             item: Content item to analyze (modified in-place)
         """
+        market_notes = market_context_notes(item.title, item.content)
+        if market_notes:
+            item.metadata["market_context_zh"] = " ".join(market_notes)
+
         # Prepare content section
         content_section = ""
         if item.content:
@@ -174,6 +179,7 @@ class ContentAnalyzer:
             .astimezone(timezone(timedelta(hours=8)))
             .date()
             .isoformat(),
+            market_context=" ".join(market_notes) or "No deterministic market-scope signal.",
             content_section=content_section,
             discussion_section=discussion_section
         )

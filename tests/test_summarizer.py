@@ -55,9 +55,32 @@ def test_generate_webhook_item_renders_single_item_detail():
     )
 
     assert result.startswith("Item 1/2")
-    assert "## [Important Item 1](https://example.com/items/1)" in result
-    assert "Summary for item 1." in result
-    assert "**Tags**: `#AI`, `#News`" in result
+    assert "## Original headline: [Important Item 1](https://example.com/items/1)" in result
+    assert "**AI analysis (not original text)**: Summary for item 1." in result
+    assert "**AI tags**: `#AI`, `#News`" in result
+
+
+def test_chinese_alert_keeps_original_headline_and_labels_ai_text() -> None:
+    summarizer = DailySummarizer()
+    item = _make_item(1)
+    item.title = "华泰期货：焦炭首轮提降，价格先抑后扬"
+    item.metadata.update(
+        {
+            "title_zh": "焦炭价格强势反弹",
+            "market_context_zh": (
+                "“先抑后扬”指期货合约走势，不等于焦炭现货涨价。"
+            ),
+        }
+    )
+
+    result = summarizer.generate_webhook_item(item, "zh", 1, 1)
+
+    assert "## 原文标题：[华泰期货：焦炭首轮提降，价格先抑后扬]" in result
+    assert "焦炭价格强势反弹" not in result
+    assert "**行情口径（程序核对）**" in result
+    assert "不等于焦炭现货涨价" in result
+    assert "**AI 解读（非原文）**" in result
+    assert "**原文来源**" in result
 
 
 def test_generate_webhook_item_includes_discussion_link_when_distinct():
@@ -245,7 +268,7 @@ def test_google_news_item_without_fallback_has_no_broken_link():
 
     result = summarizer.generate_webhook_item(item, "zh", 1, 1)
 
-    assert "## Important Item 1" in result
+    assert "## 原文标题：Important Item 1" in result
     assert "news.google.com" not in result
 
 
