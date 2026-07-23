@@ -57,7 +57,9 @@ def test_generate_webhook_item_renders_single_item_detail():
     assert result.startswith("Item 1/2")
     assert "## Original headline: [Important Item 1](https://example.com/items/1)" in result
     assert "**AI analysis (not original text)**: Summary for item 1." in result
-    assert "**AI tags**: `#AI`, `#News`" in result
+    assert "**Original excerpt (publisher text)**" in result
+    assert "**AI tags**" not in result
+    assert "#AI" not in result
 
 
 def test_chinese_alert_keeps_original_headline_and_labels_ai_text() -> None:
@@ -67,6 +69,7 @@ def test_chinese_alert_keeps_original_headline_and_labels_ai_text() -> None:
     item.metadata.update(
         {
             "title_zh": "焦炭价格强势反弹",
+            "original_excerpt": "昨日双焦主力合约先抑后扬，钢厂开启焦炭首轮提降。",
             "market_context_zh": (
                 "“先抑后扬”指期货合约走势，不等于焦炭现货涨价。"
             ),
@@ -77,10 +80,15 @@ def test_chinese_alert_keeps_original_headline_and_labels_ai_text() -> None:
 
     assert "## 原文标题：[华泰期货：焦炭首轮提降，价格先抑后扬]" in result
     assert "焦炭价格强势反弹" not in result
+    assert "**原文内容（媒体原话节选）**" in result
+    assert "昨日双焦主力合约先抑后扬" in result
     assert "**行情口径（程序核对）**" in result
     assert "不等于焦炭现货涨价" in result
     assert "**AI 解读（非原文）**" in result
     assert "**原文来源**" in result
+    assert "AI 标签" not in result
+    assert result.index("原文内容（媒体原话节选）") < result.index("原文来源")
+    assert result.index("原文来源") < result.index("AI 解读（非原文）")
 
 
 def test_generate_webhook_item_includes_discussion_link_when_distinct():

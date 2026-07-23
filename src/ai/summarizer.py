@@ -8,6 +8,7 @@ from urllib.parse import quote, urlsplit
 
 from ..models import ContentItem
 from ..google_news_urls import is_google_news_url
+from .article_text import excerpt_from_feed_content
 
 
 _CJK = r"[\u4e00-\u9fff\u3400-\u4dbf]"
@@ -79,6 +80,8 @@ LABELS = {
         "original_source": "Original source",
         "ai_background": "AI background (not original text)",
         "ai_tags": "AI tags",
+        "original_content": "Original excerpt (publisher text)",
+        "original_unavailable": "The source did not provide readable article text; open the headline link to read the original.",
         "selected_items": "From {total} items, {selected} important content pieces were selected",
         "empty_analyzed": "Analyzed {total} items, but none met the importance threshold.",
         "empty_body": (
@@ -106,6 +109,8 @@ LABELS = {
         "original_source": "原文来源",
         "ai_background": "AI 背景（非原文）",
         "ai_tags": "AI 标签",
+        "original_content": "原文内容（媒体原话节选）",
+        "original_unavailable": "新闻源未提供可读取的正文，请点击原文标题查看。",
         "selected_items": "从 {total} 条内容中筛选出 {selected} 条重要资讯。",
         "empty_analyzed": "已分析 {total} 条内容，但没有达到重要性阈值的条目。",
         "empty_body": (
@@ -237,6 +242,10 @@ class DailySummarizer:
             translated = meta.get("title_zh")
             if translated and str(translated).strip() != str(item.title).strip():
                 ai_translation = _pangu(_escape_markdown(translated))
+        original_excerpt = meta.get("original_excerpt") or excerpt_from_feed_content(
+            item.title,
+            item.content,
+        )
 
         summary = (
             meta.get(f"detailed_summary_{language}")
@@ -301,6 +310,17 @@ class DailySummarizer:
             "",
         ]
 
+        if original_excerpt:
+            excerpt = _escape_markdown(original_excerpt)
+            if language == "zh":
+                excerpt = _pangu(excerpt)
+            lines.append(f"**{labels['original_content']}**{separator}{excerpt}")
+        else:
+            lines.append(f"**{labels['original_content']}**{separator}{labels['original_unavailable']}")
+        lines.append("")
+        lines.append(f"**{labels['original_source']}**{separator}{source_line}")
+        lines.append("")
+
         if ai_translation:
             lines.append(f"**{labels['ai_translation']}**{separator}{ai_translation}")
             lines.append("")
@@ -315,8 +335,6 @@ class DailySummarizer:
         lines.extend(
             [
                 f"**{labels['ai_analysis']}**{separator}{summary}",
-                "",
-                f"**{labels['original_source']}**{separator}{source_line}",
             ]
         )
 
@@ -347,11 +365,6 @@ class DailySummarizer:
         if discussion:
             lines.append("")
             lines.append(f"**{labels['discussion']}**: {discussion}")
-
-        if item.ai_tags:
-            tags_str = ", ".join([f"`#{_escape_markdown(t)}`" for t in item.ai_tags])
-            lines.append("")
-            lines.append(f"**{labels['ai_tags']}**{separator}{tags_str}")
 
         lines.append("")
         lines.append("---")

@@ -24,6 +24,7 @@ from .prompts import (
 )
 from .utils import parse_json_response
 from .grounding import corroborated_years, extract_years, remove_unsupported_years
+from .article_text import extract_article_text, excerpt_from_feed_content
 from ..google_news_urls import is_google_news_url, resolve_google_news_url
 from ..models import ContentItem
 
@@ -90,6 +91,38 @@ class ContentEnricher:
         if resolved:
             item.metadata["google_news_url"] = source_url
             item.metadata["resolved_url"] = resolved
+
+    async def _load_original_article(self, item: ContentItem) -> None:
+        """Store a short verbatim excerpt and longer analysis copy when available."""
+        fallback = excerpt_from_feed_content(item.title, item.content)
+        if fallback:
+            item.metadata["original_excerpt"] = fallback
+
+        if self._url_client is None:
+            return
+        source_url = item.metadata.get("resolved_url")
+        if not source_url and not is_google_news_url(item.url):
+            source_url = str(item.url)
+        if not source_url:
+            return
+
+        try:
+            response = await self._url_client.get(str(source_url))
+            response.raise_for_status()
+        except httpx.HTTPError:
+            return
+
+        content_type = response.headers.get("content-type", "").lower()
+        if content_type and "html" not in content_type:
+            return
+
+        article_text = extract_article_text(response.text[:2_000_000])
+        if not article_text:
+            return
+        item.metadata["original_article_text"] = article_text
+        excerpt = excerpt_from_feed_content(item.title, article_text)
+        if excerpt:
+            item.metadata["original_excerpt"] = excerpt
 
     async def _web_search(self, query: str, max_results: int = 3) -> list:
         """Search the web for context via DuckDuckGo.
@@ -170,17 +203,19 @@ class ContentEnricher:
         """
         # Resolve Google News wrappers before rendering links or prompting the AI.
         await self._resolve_article_url(item)
+        await self._load_original_article(item)
 
         # Extract content text and comments separately
         content_text = ""
         comments_text = ""
-        if item.content:
-            if "--- Top Comments ---" in item.content:
-                main, comments_part = item.content.split("--- Top Comments ---", 1)
+        analysis_content = item.metadata.get("original_article_text") or item.content
+        if analysis_content:
+            if "--- Top Comments ---" in analysis_content:
+                main, comments_part = analysis_content.split("--- Top Comments ---", 1)
                 content_text = main.strip()[:4000]
                 comments_text = comments_part.strip()[:2000]
             else:
-                content_text = item.content[:4000]
+                content_text = str(analysis_content)[:4000]
 
         # Step 1: AI identifies concepts to explain
         queries = await self._extract_concepts(item, content_text)
