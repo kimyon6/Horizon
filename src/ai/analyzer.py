@@ -3,6 +3,7 @@
 import asyncio
 import json
 import re
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from pydantic import BaseModel, Field, ValidationError
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -11,6 +12,7 @@ from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, MofNCo
 from .client import AIClient
 from .prompts import CONTENT_ANALYSIS_SYSTEM, CONTENT_ANALYSIS_USER
 from .utils import parse_json_response
+from .grounding import extract_years, remove_unsupported_years
 from ..models import ContentItem
 
 DEFAULT_THROTTLE_SEC = 0.0
@@ -167,6 +169,11 @@ class ContentAnalyzer:
             source=f"{item.source_type.value}",
             author=item.author or "Unknown",
             url=str(item.url),
+            published_at=item.published_at.isoformat(),
+            current_date=datetime.now(timezone.utc)
+            .astimezone(timezone(timedelta(hours=8)))
+            .date()
+            .isoformat(),
             content_section=content_section,
             discussion_section=discussion_section
         )
@@ -192,11 +199,15 @@ class ContentAnalyzer:
             return
 
         # Update item with analysis results
+        supported_years = extract_years(item.title, item.content)
+        grounded_reason = remove_unsupported_years(result.reason, supported_years)
+        grounded_summary = remove_unsupported_years(result.summary, supported_years)
+
         if is_routine_futures_update(item.title):
             item.ai_score = min(result.score, 4.0)
-            item.ai_reason = f"常规期货行情已按用户偏好降权；{result.reason}"
+            item.ai_reason = f"常规期货行情已按用户偏好降权；{grounded_reason}"
         else:
             item.ai_score = result.score
-            item.ai_reason = result.reason
-        item.ai_summary = result.summary
+            item.ai_reason = grounded_reason
+        item.ai_summary = grounded_summary
         item.ai_tags = result.tags

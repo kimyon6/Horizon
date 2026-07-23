@@ -55,6 +55,9 @@ Consider:
 - Reliability: official policies, company announcements, customs/industry data, and reports with concrete numbers rank above rumors or promotional claims
 - Novelty: score repeated coverage of an already-known event lower
 - Recency: if a newly indexed article mainly repeats an event, project, forecast, or policy from more than 30 days ago without a meaningful new development, score it 0-4
+- Treat the feed publication time and the event/reporting period as separate facts. A page published today can still discuss an old event.
+- Never invent or infer a calendar year that is absent from the title and content. Keep wording such as "second quarter" yearless when the year is not explicitly supported.
+- If the source explicitly concerns an old period and reports no genuinely new announcement today, score it 0-4 even when the feed publication time is today.
 - The reader already monitors futures prices. Routine intraday futures moves, main-contract quotes, percentage changes, opening/closing prices, technical alerts, and generic daily price tables must score 0-4 unless the article also reports a new physical-market event, policy, or supply-demand change
 - Physical coke/coking-coal negotiations are different from futures ticker news: coke price-cut or price-rise proposals (提降/提涨), acceptance/implementation (落地), round counts, mill purchase-price changes, and tender changes are decision-useful and should normally score 7-10 when reliably reported
 - For foreign-language news, assess the event's transmission path to Chinese import supply, landed cost, freight, steel-mill procurement, and bargaining expectations; translate the decision-useful facts into Simplified Chinese during enrichment
@@ -73,6 +76,8 @@ Title: {title}
 Source: {source}
 Author: {author}
 URL: {url}
+Feed publication time: {published_at}
+Current date in Beijing: {current_date}
 {content_section}
 {discussion_section}
 
@@ -134,6 +139,9 @@ Field definitions:
 Guidelines:
 - EVERY field (except community_discussion when no comments exist) must contain at least one complete sentence — no field may be empty or contain just a phrase
 - Base your explanation on the provided content and web search results — do NOT fabricate information
+- Treat the feed publication time and the event/reporting period as different facts.
+- Never add a specific year to an ambiguous period such as "second quarter" unless the title/content states it or at least two supplied search results independently confirm it. If uncertain, preserve the period without a year.
+- Do not repeat an older similarly worded report when the headline-verification results identify a current report.
 - Distinguish confirmed facts from forecasts, opinions, rumors, and market expectations
 - Do not give a buy/sell instruction; provide evidence, likely business transmission paths, and uncertainties
 - ONLY explain concepts and terms that are explicitly mentioned in the title, summary, or content
@@ -147,6 +155,8 @@ CONTENT_ENRICHMENT_USER = """Provide a structured bilingual analysis for the fol
 **News Item:**
 - Title: {title}
 - URL: {url}
+- Feed publication time: {published_at}
+- Current date in Beijing: {current_date}
 - One-line summary: {summary}
 - Score: {score}/10
 - Reason: {reason}

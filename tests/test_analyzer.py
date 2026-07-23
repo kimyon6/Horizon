@@ -121,6 +121,46 @@ def test_analyze_item_accepts_valid_result():
     assert item.ai_tags == ["ai", "research"]
 
 
+def test_analyze_item_removes_hallucinated_year_missing_from_source() -> None:
+    async def complete(**kwargs):
+        return json.dumps(
+            {
+                "score": 8.0,
+                "reason": "2025年第二季度供应增加。",
+                "summary": "淡水河谷2025年第二季度铁矿石产量为8426万吨。",
+                "tags": ["铁矿石", "淡水河谷"],
+            }
+        )
+
+    item = _make_item("rss:test:unsupported-year")
+    item.title = "淡水河谷第二季度铁矿石产量8426万吨超预期"
+    item.content = "淡水河谷第二季度铁矿石产量报8426万吨，高于市场预期。"
+
+    asyncio.run(ContentAnalyzer(SimpleNamespace(complete=complete))._analyze_item(item))
+
+    assert item.ai_summary == "淡水河谷第二季度铁矿石产量为8426万吨。"
+    assert item.ai_reason == "第二季度供应增加。"
+
+
+def test_analyze_item_keeps_year_explicitly_present_in_source() -> None:
+    async def complete(**kwargs):
+        return json.dumps(
+            {
+                "score": 8.0,
+                "reason": "报告期明确。",
+                "summary": "淡水河谷2026年第二季度产量增加。",
+                "tags": ["铁矿石"],
+            }
+        )
+
+    item = _make_item("rss:test:supported-year")
+    item.content = "淡水河谷发布2026年第二季度产销量报告。"
+
+    asyncio.run(ContentAnalyzer(SimpleNamespace(complete=complete))._analyze_item(item))
+
+    assert "2026年第二季度" in item.ai_summary
+
+
 @pytest.mark.parametrize(
     ("title", "expected"),
     [

@@ -10,6 +10,7 @@ import json
 import re
 import sys
 import os
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -22,6 +23,7 @@ from .prompts import (
     CONTENT_ENRICHMENT_SYSTEM, CONTENT_ENRICHMENT_USER,
 )
 from .utils import parse_json_response
+from .grounding import corroborated_years, extract_years, remove_unsupported_years
 from ..google_news_urls import is_google_news_url, resolve_google_news_url
 from ..models import ContentItem
 
@@ -183,15 +185,42 @@ class ContentEnricher:
         # Step 1: AI identifies concepts to explain
         queries = await self._extract_concepts(item, content_text)
 
-        # Step 2: Search web for each concept
-        all_results = []
+        # Step 2: Verify the exact headline first. Concept searches alone can
+        # surface an older, similarly worded quarterly report and misdate a
+        # current event.
+        published_at = item.published_at
+        if published_at.tzinfo is None:
+            published_at = published_at.replace(tzinfo=timezone.utc)
+        publication_year = published_at.astimezone(
+            timezone(timedelta(hours=8))
+        ).year
+        verification_results = await self._web_search(
+            f'{item.title} {publication_year}',
+            max_results=5,
+        )
+        all_results = list(verification_results)
         web_sections = []
+        if verification_results:
+            lines = [
+                f"- [{r['title']}]({r['url']}): {r['body']}"
+                for r in verification_results
+            ]
+            web_sections.append("**Headline verification:**\n" + "\n".join(lines))
+
         for query in queries:
             results = await self._web_search(query)
             all_results.extend(results)
             if results:
                 lines = [f"- [{r['title']}]({r['url']}): {r['body']}" for r in results]
                 web_sections.append(f"**{query}:**\n" + "\n".join(lines))
+
+        # The same page may appear in the headline and concept searches. Count
+        # it only once so "two sources agree" really means two independent URLs.
+        unique_results = {}
+        for result in all_results:
+            key = result.get("url") or (result.get("title"), result.get("body"))
+            unique_results.setdefault(key, result)
+        all_results = list(unique_results.values())
         web_context = "\n\n".join(web_sections) if web_sections else ""
 
         # Index of available URLs for citation validation
@@ -201,6 +230,11 @@ class ContentEnricher:
         user_prompt = CONTENT_ENRICHMENT_USER.format(
             title=item.title,
             url=item.metadata.get("resolved_url") or str(item.url),
+            published_at=item.published_at.isoformat(),
+            current_date=datetime.now(timezone.utc)
+            .astimezone(timezone(timedelta(hours=8)))
+            .date()
+            .isoformat(),
             summary=item.ai_summary or item.title,
             score=item.ai_score or 0,
             reason=item.ai_reason or "",
@@ -224,15 +258,35 @@ class ContentEnricher:
             await self._translate_item(item)
             return
 
+        source_years = extract_years(item.title, content_text)
+        verified_years = corroborated_years(all_results)
+        if source_years:
+            supported_years = source_years | verified_years
+        elif verified_years:
+            # When the feed itself gives no year, prefer the newest independently
+            # corroborated match and reject older lookalike quarterly reports.
+            supported_years = {max(verified_years)}
+        else:
+            supported_years = set()
+        if verified_years:
+            item.metadata["verified_event_years"] = sorted(verified_years)
+
         # Combine structured sub-fields into per-language detailed_summary
         for lang in ("en", "zh"):
             if result.get(f"title_{lang}"):
                 val = result[f"title_{lang}"]
-                item.metadata[f"title_{lang}"] = val.get("text") or str(val) if isinstance(val, dict) else str(val)
+                title = val.get("text") or str(val) if isinstance(val, dict) else str(val)
+                item.metadata[f"title_{lang}"] = remove_unsupported_years(
+                    title,
+                    supported_years,
+                )
 
             parts = []
             for field in ("whats_new", "why_it_matters", "key_details"):
-                text = result.get(f"{field}_{lang}", "").strip()
+                text = remove_unsupported_years(
+                    result.get(f"{field}_{lang}", ""),
+                    supported_years,
+                )
                 if text:
                     parts.append(text)
             if parts:
@@ -240,11 +294,19 @@ class ContentEnricher:
 
             if result.get(f"background_{lang}"):
                 val = result[f"background_{lang}"]
-                item.metadata[f"background_{lang}"] = val.get("text") or str(val) if isinstance(val, dict) else str(val)
+                background = val.get("text") or str(val) if isinstance(val, dict) else str(val)
+                item.metadata[f"background_{lang}"] = remove_unsupported_years(
+                    background,
+                    supported_years,
+                )
 
             if result.get(f"community_discussion_{lang}"):
                 val = result[f"community_discussion_{lang}"]
-                item.metadata[f"community_discussion_{lang}"] = val.get("text") or str(val) if isinstance(val, dict) else str(val)
+                discussion = val.get("text") or str(val) if isinstance(val, dict) else str(val)
+                item.metadata[f"community_discussion_{lang}"] = remove_unsupported_years(
+                    discussion,
+                    supported_years,
+                )
 
         # Store citation sources — only URLs that actually came from our search results
         if result.get("sources") and available_urls:
@@ -276,9 +338,16 @@ class ContentEnricher:
             )
             result = self._parse_json_response(response)
             if result:
+                supported_years = extract_years(item.title, item.content)
                 if result.get("title_zh"):
-                    item.metadata["title_zh"] = result["title_zh"]
+                    item.metadata["title_zh"] = remove_unsupported_years(
+                        result["title_zh"],
+                        supported_years,
+                    )
                 if result.get("summary_zh"):
-                    item.metadata["detailed_summary_zh"] = result["summary_zh"]
+                    item.metadata["detailed_summary_zh"] = remove_unsupported_years(
+                        result["summary_zh"],
+                        supported_years,
+                    )
         except Exception:
             pass
