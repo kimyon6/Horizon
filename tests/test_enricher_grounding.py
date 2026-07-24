@@ -11,6 +11,7 @@ def test_enricher_verifies_headline_and_removes_unsupported_old_year(monkeypatch
     result = {
         "title_en": "Vale Q2 output beats expectations",
         "title_zh": "淡水河谷二季度产量超预期",
+        "source_excerpt_zh": "淡水河谷公布2025年第二季度铁矿石产量为8426万吨。",
         "whats_new_en": "Vale reported 2025 second-quarter output of 84.26 Mt.",
         "whats_new_zh": "淡水河谷公布2025年第二季度铁矿石产量8426万吨。",
         "why_it_matters_en": "The supply signal matters to steel mills.",
@@ -72,4 +73,6 @@ def test_enricher_verifies_headline_and_removes_unsupported_old_year(monkeypatch
     assert "2025" not in item.metadata["detailed_summary_zh"]
     assert "第二季度铁矿石产量8426万吨" in item.metadata["detailed_summary_zh"]
     assert "2026年数据" in item.metadata["detailed_summary_zh"]
+    assert "2025" not in item.metadata["source_excerpt_zh"]
+    assert "淡水河谷公布第二季度铁矿石产量为8426万吨" in item.metadata["source_excerpt_zh"]
     assert item.metadata["verified_event_years"] == [2026]

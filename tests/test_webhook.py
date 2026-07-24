@@ -988,6 +988,33 @@ class TestSendDailySummary:
         assert "强势反弹" not in item_message["summary"]
         del os.environ[_TEST_URL_ENV]
 
+    def test_foreign_item_message_title_uses_chinese_translation(self):
+        os.environ[_TEST_URL_ENV] = _TEST_URL
+        config = WebhookConfig(
+            enabled=True,
+            url_env=_TEST_URL_ENV,
+            delivery="summary_and_items",
+        )
+        notifier = WebhookNotifier(config)
+        item = _make_item(title="Australian iron ore shipments disrupted")
+        item.metadata["title_zh"] = "澳大利亚铁矿石发运受扰"
+        item.metadata["source_excerpt_zh"] = "港口发运因天气短暂停止。"
+
+        messages = notifier.build_daily_summary_messages(
+            summary="# Full summary",
+            important_items=[item],
+            all_items_count=1,
+            date="2026-07-24",
+            lang="zh",
+            summarizer=DailySummarizer(),
+        )
+
+        item_message = next(message for message in messages if message["message_kind"] == "item")
+        assert item_message["message_title"] == "1/1 国外新闻｜澳大利亚铁矿石发运受扰"
+        assert item_message["item_title"] == "国外新闻｜澳大利亚铁矿石发运受扰"
+        assert "Australian iron ore shipments disrupted" not in item_message["summary"]
+        del os.environ[_TEST_URL_ENV]
+
     def test_summary_and_items_overview_last_sends_reversed_items_then_overview(self):
         """overview_position='last' keeps overview as newest chat message."""
         os.environ[_TEST_URL_ENV] = _TEST_URL

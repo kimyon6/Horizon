@@ -65,6 +65,27 @@ def _pangu(text: str) -> str:
     return text
 
 
+def is_foreign_news(item: ContentItem, language: str = "zh") -> bool:
+    """Return whether a Chinese alert would otherwise expose a foreign headline."""
+    return language == "zh" and not re.search(_CJK, str(item.title))
+
+
+def localized_title(item: ContentItem, language: str = "en") -> str:
+    """Choose a safe display title without exposing English in Chinese alerts."""
+    if is_foreign_news(item, language):
+        translated = str(item.metadata.get("title_zh") or "").strip()
+        return translated or "国外新闻（请点击查看英文原文）"
+    return str(item.title)
+
+
+def webhook_item_title(item: ContentItem, language: str = "en") -> str:
+    """Build the short title shown by the webhook client."""
+    title = localized_title(item, language)
+    if is_foreign_news(item, language):
+        return f"国外新闻｜{title}"
+    return title
+
+
 LABELS = {
     "en": {
         "header": "Horizon Daily",
@@ -74,13 +95,17 @@ LABELS = {
         "references": "References",
         "tags": "Tags",
         "original_title": "Original headline",
+        "foreign_title": "Foreign news (AI Chinese translation)",
         "ai_translation": "AI translation (not original text)",
         "market_scope": "Market scope (rule-based check)",
         "ai_analysis": "AI analysis (not original text)",
         "original_source": "Original source",
+        "foreign_source": "Foreign original source",
         "ai_background": "AI background (not original text)",
         "ai_tags": "AI tags",
         "original_content": "Original excerpt (publisher text)",
+        "translated_content": "News content (AI Chinese translation)",
+        "translated_unavailable": "The foreign source is in English. Open the headline link to read it.",
         "original_unavailable": "The source did not provide readable article text; open the headline link to read the original.",
         "selected_items": "From {total} items, {selected} important content pieces were selected",
         "empty_analyzed": "Analyzed {total} items, but none met the importance threshold.",
@@ -103,13 +128,17 @@ LABELS = {
         "references": "参考链接",
         "tags": "标签",
         "original_title": "原文标题",
+        "foreign_title": "国外新闻（AI 中文译题）",
         "ai_translation": "AI 中文译题（非原文）",
         "market_scope": "行情口径（程序核对）",
         "ai_analysis": "AI 解读（非原文）",
         "original_source": "原文来源",
+        "foreign_source": "国外原文来源",
         "ai_background": "AI 背景（非原文）",
         "ai_tags": "AI 标签",
         "original_content": "原文内容（媒体原话节选）",
+        "translated_content": "新闻内容（AI 中文翻译）",
+        "translated_unavailable": "国外新闻原文为英文，暂未生成中文翻译，请点击标题查看原文。",
         "original_unavailable": "新闻源未提供可读取的正文，请点击原文标题查看。",
         "selected_items": "从 {total} 条内容中筛选出 {selected} 条重要资讯。",
         "empty_analyzed": "已分析 {total} 条内容，但没有达到重要性阈值的条目。",
@@ -167,7 +196,7 @@ class DailySummarizer:
         # TOC
         toc_entries = []
         for i, item in enumerate(items):
-            _t = item.title
+            _t = webhook_item_title(item, language)
             t = _escape_markdown(_t)
             if language == "zh":
                 t = _pangu(t)
@@ -206,7 +235,7 @@ class DailySummarizer:
 
         entries = []
         for i, item in enumerate(items, start=1):
-            title = _escape_markdown(item.title)
+            title = _escape_markdown(webhook_item_title(item, language))
             if language == "zh":
                 title = _pangu(title)
             score = item.ai_score or "?"
@@ -230,35 +259,39 @@ class DailySummarizer:
 
     def _format_item(self, item: ContentItem, labels: dict, language: str, index: int) -> str:
         """Format a single ContentItem into Markdown."""
-        _title = item.title
+        foreign_news = is_foreign_news(item, language)
+        _title = localized_title(item, language)
         title = _escape_markdown(_title)
         raw_url = str(item.url)
         url = _reader_url(item)
         score = item.ai_score or "?"
         meta = item.metadata
         separator = "：" if language == "zh" else ": "
-        ai_translation = ""
-        if language == "zh" and not re.search(_CJK, str(item.title)):
-            translated = meta.get("title_zh")
-            if translated and str(translated).strip() != str(item.title).strip():
-                ai_translation = _pangu(_escape_markdown(translated))
         original_excerpt = meta.get("original_excerpt") or excerpt_from_feed_content(
             item.title,
             item.content,
         )
 
-        summary = (
-            meta.get(f"detailed_summary_{language}")
-            or meta.get("detailed_summary")
-            or item.ai_summary
-            or ""
-        )
-        background = meta.get(f"background_{language}") or meta.get("background") or ""
-        discussion = (
-            meta.get(f"community_discussion_{language}")
-            or meta.get("community_discussion")
-            or ""
-        )
+        if foreign_news:
+            summary = (
+                meta.get("detailed_summary_zh")
+                or "AI 中文解读暂未生成，请以国外原文来源为准。"
+            )
+            background = meta.get("background_zh") or ""
+            discussion = meta.get("community_discussion_zh") or ""
+        else:
+            summary = (
+                meta.get(f"detailed_summary_{language}")
+                or meta.get("detailed_summary")
+                or item.ai_summary
+                or ""
+            )
+            background = meta.get(f"background_{language}") or meta.get("background") or ""
+            discussion = (
+                meta.get(f"community_discussion_{language}")
+                or meta.get("community_discussion")
+                or ""
+            )
 
         summary = _escape_markdown(summary)
         background = _escape_markdown(background)
@@ -306,11 +339,24 @@ class DailySummarizer:
 
         lines = [
             f'<a id="item-{index}"></a>',
-            f"## {labels['original_title']}{separator}{title_link} \u2b50\ufe0f {score}/10",  # ⭐️
+            (
+                f"## {labels['foreign_title'] if foreign_news else labels['original_title']}"
+                f"{separator}{title_link} \u2b50\ufe0f {score}/10"
+            ),  # ⭐️
             "",
         ]
 
-        if original_excerpt:
+        if foreign_news:
+            translated_excerpt = str(meta.get("source_excerpt_zh") or "").strip()
+            if translated_excerpt:
+                excerpt = _pangu(_escape_markdown(translated_excerpt))
+                lines.append(f"**{labels['translated_content']}**{separator}{excerpt}")
+            else:
+                lines.append(
+                    f"**{labels['translated_content']}**{separator}"
+                    f"{labels['translated_unavailable']}"
+                )
+        elif original_excerpt:
             excerpt = _escape_markdown(original_excerpt)
             if language == "zh":
                 excerpt = _pangu(excerpt)
@@ -318,12 +364,9 @@ class DailySummarizer:
         else:
             lines.append(f"**{labels['original_content']}**{separator}{labels['original_unavailable']}")
         lines.append("")
-        lines.append(f"**{labels['original_source']}**{separator}{source_line}")
+        source_label = labels["foreign_source"] if foreign_news else labels["original_source"]
+        lines.append(f"**{source_label}**{separator}{source_line}")
         lines.append("")
-
-        if ai_translation:
-            lines.append(f"**{labels['ai_translation']}**{separator}{ai_translation}")
-            lines.append("")
 
         market_context = meta.get("market_context_zh") if language == "zh" else ""
         if market_context:
@@ -343,7 +386,7 @@ class DailySummarizer:
             lines.append(f"**{labels['ai_background']}**{separator}{background}")
 
         sources = meta.get("sources") or []
-        if sources:
+        if sources and not foreign_news:
             reference_items = []
             for source in sources:
                 reference_title = html.escape(str(source.get("title", "")), quote=True)

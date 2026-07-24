@@ -114,8 +114,10 @@ CONTENT_ENRICHMENT_SYSTEM = """You are a careful business analyst helping a Chin
 
 Given a high-scoring news item, its content, and web search results about the topic, your job is to produce a structured analysis.
 
-Provide EACH text field in BOTH English and Chinese. Use the following key naming convention:
+Provide EACH analysis field in BOTH English and Chinese, plus one faithful Chinese
+translation of the publisher excerpt. Use the following key naming convention:
 - title_en / title_zh
+- source_excerpt_zh
 - whats_new_en / whats_new_zh
 - why_it_matters_en / why_it_matters_zh
 - key_details_en / key_details_zh
@@ -125,23 +127,26 @@ Provide EACH text field in BOTH English and Chinese. Use the following key namin
 Field definitions:
 0. **title** (one short phrase, ≤15 words): A clear, accurate headline for the news item.
 
-1. **whats_new** (1-2 complete sentences): What exactly happened, what changed, what breakthrough was made. Be specific — mention names, versions, numbers, dates when available.
+1. **source_excerpt_zh** (1-3 complete sentences): A faithful Simplified Chinese translation of the publisher content supplied under **Content**. Translate only; do not analyze, infer, add facts, or mix in web-search material. Return an empty string only when no readable publisher content is supplied.
 
-2. **why_it_matters** (1-2 complete sentences): Explain the practical business impact. For steel news, connect it to raw-material cost, mill pricing, steel demand, inventory, logistics, exports, or cash-flow risk. For wellness news, connect it to sourcing cost, product compliance, food safety, customer demand, or sales channels. State whether the signal is supportive, negative, mixed, or uncertain only when supported by the source.
+2. **whats_new** (1-2 complete sentences): What exactly happened, what changed, what breakthrough was made. Be specific — mention names, versions, numbers, dates when available.
 
-3. **key_details** (1-2 complete sentences): Preserve useful numbers, dates, regions, companies, products, policies, and limitations. End with the next indicator or development the reader should watch when the evidence supports one.
+3. **why_it_matters** (1-2 complete sentences): Explain the practical business impact. For steel news, connect it to raw-material cost, mill pricing, steel demand, inventory, logistics, exports, or cash-flow risk. For wellness news, connect it to sourcing cost, product compliance, food safety, customer demand, or sales channels. State whether the signal is supportive, negative, mixed, or uncertain only when supported by the source.
 
-4. **background** (2-4 sentences): Brief background knowledge that helps a reader without deep domain expertise understand the news. Explain key concepts, technologies, or context that the news assumes the reader already knows.
+4. **key_details** (1-2 complete sentences): Preserve useful numbers, dates, regions, companies, products, policies, and limitations. End with the next indicator or development the reader should watch when the evidence supports one.
 
-5. **community_discussion** (1-3 sentences): If community comments are provided, summarize the overall sentiment and key viewpoints from the discussion — agreements, disagreements, concerns, additional insights, or notable counterarguments. If no comments are provided, return an empty string.
+5. **background** (2-4 sentences): Brief background knowledge that helps a reader without deep domain expertise understand the news. Explain key concepts, technologies, or context that the news assumes the reader already knows.
+
+6. **community_discussion** (1-3 sentences): If community comments are provided, summarize the overall sentiment and key viewpoints from the discussion — agreements, disagreements, concerns, additional insights, or notable counterarguments. If no comments are provided, return an empty string.
 
 **CRITICAL — Language rules (MUST follow):**
 - All *_en fields MUST be written in English.
 - All *_zh fields MUST be written in Simplified Chinese (简体中文). 绝对不能用英文写 _zh 字段的内容。Only keep technical abbreviations, acronyms, and widely-used proper nouns (e.g. "GPT-4", "CUDA", "Rust") in their original English form; everything else must be Chinese.
 
 Guidelines:
-- EVERY field (except community_discussion when no comments exist) must contain at least one complete sentence — no field may be empty or contain just a phrase
+- EVERY analysis field (except community_discussion when no comments exist) must contain at least one complete sentence — no analysis field may be empty or contain just a phrase
 - Base your explanation on the provided content and web search results — do NOT fabricate information
+- Keep source_excerpt_zh separate from the analysis fields. It must be a faithful translation of publisher text, not an explanation or market conclusion.
 - Treat the feed publication time and the event/reporting period as different facts.
 - Never add a specific year to an ambiguous period such as "second quarter" unless the title/content states it or at least two supplied search results independently confirm it. If uncertain, preserve the period without a year.
 - Do not repeat an older similarly worded report when the headline-verification results identify a current report.
@@ -179,6 +184,7 @@ Respond with valid JSON only. Each _en field must be in English; each _zh field 
 {{
   "title_en": "<short headline in English, ≤15 words>",
   "title_zh": "<用中文写一个简短标题，不超过15个词>",
+  "source_excerpt_zh": "<忠实翻译媒体正文为1-3句中文，不分析、不添加事实；没有正文时为空字符串>",
   "whats_new_en": "<1-2 sentences in English>",
   "whats_new_zh": "<用中文写1-2句话>",
   "why_it_matters_en": "<1-2 sentences in English>",

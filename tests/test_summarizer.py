@@ -91,6 +91,33 @@ def test_chinese_alert_keeps_original_headline_and_labels_ai_text() -> None:
     assert result.index("原文来源") < result.index("AI 解读（非原文）")
 
 
+def test_foreign_alert_hides_english_and_separates_translation_from_analysis() -> None:
+    summarizer = DailySummarizer()
+    item = _make_item(1)
+    item.title = "Australia iron ore exports disrupted by cyclone"
+    item.content = "Port operations were suspended after a cyclone warning."
+    item.metadata.update(
+        {
+            "title_zh": "澳大利亚铁矿石出口受气旋影响",
+            "original_excerpt": "Port operations were suspended after a cyclone warning.",
+            "source_excerpt_zh": "气旋预警发布后，港口暂停作业。",
+            "detailed_summary_zh": "若停运持续，短期可能扰动中国到港节奏。",
+            "feed_name": "Reuters Commodities",
+        }
+    )
+
+    result = summarizer.generate_webhook_item(item, "zh", 1, 1)
+
+    assert "Australia iron ore exports disrupted by cyclone" not in result
+    assert "Port operations were suspended after a cyclone warning." not in result
+    assert "## 国外新闻（AI 中文译题）：[澳大利亚铁矿石出口受气旋影响]" in result
+    assert "**新闻内容（AI 中文翻译）**：气旋预警发布后，港口暂停作业。" in result
+    assert "**国外原文来源**" in result
+    assert "Reuters Commodities" in result
+    assert "**AI 解读（非原文）**：若停运持续，短期可能扰动中国到港节奏。" in result
+    assert result.index("新闻内容（AI 中文翻译）") < result.index("AI 解读（非原文）")
+
+
 def test_generate_webhook_item_includes_discussion_link_when_distinct():
     summarizer = DailySummarizer()
     item = _make_item(1)
@@ -265,7 +292,8 @@ def test_google_news_item_falls_back_to_publisher_homepage():
 
     result = summarizer.generate_webhook_item(item, "zh", 1, 1)
 
-    assert "[Important Item 1](https://finance.sina.com.cn)" in result
+    assert "[国外新闻（请点击查看英文原文）](https://finance.sina.com.cn)" in result
+    assert "Important Item 1" not in result
     assert "news.google.com" not in result
 
 
@@ -276,13 +304,15 @@ def test_google_news_item_without_fallback_has_no_broken_link():
 
     result = summarizer.generate_webhook_item(item, "zh", 1, 1)
 
-    assert "## 原文标题：Important Item 1" in result
+    assert "## 国外新闻（AI 中文译题）：国外新闻（请点击查看英文原文）" in result
+    assert "Important Item 1" not in result
     assert "news.google.com" not in result
 
 
 def test_google_news_reference_links_are_omitted() -> None:
     summarizer = DailySummarizer()
     item = _make_item(1)
+    item.title = "力拓发布最新铁矿石运营消息"
     item.metadata["sources"] = [
         {
             "title": "Google wrapper",

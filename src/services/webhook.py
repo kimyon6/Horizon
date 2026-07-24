@@ -13,7 +13,7 @@ import httpx
 
 from ..ai.markdown_utils import clean_app_summary_markdown
 from ..models import ContentItem, WebhookConfig
-from ..ai.summarizer import DailySummarizer
+from ..ai.summarizer import DailySummarizer, webhook_item_title
 from ..url_security import UnsafeURLError, safe_request, validate_http_url
 
 logger = logging.getLogger(__name__)
@@ -529,7 +529,7 @@ class WebhookNotifier:
                 "summary": overview,
             }
             for item_index, item in enumerate(important_items, start=1):
-                title = str(item.title)
+                title = webhook_item_title(item, lang)
                 item_summary = summarizer.generate_webhook_item(
                     item,
                     language=lang,

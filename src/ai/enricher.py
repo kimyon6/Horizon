@@ -310,6 +310,12 @@ class ContentEnricher:
         if verified_years:
             item.metadata["verified_event_years"] = sorted(verified_years)
 
+        if result.get("source_excerpt_zh"):
+            item.metadata["source_excerpt_zh"] = remove_unsupported_years(
+                result["source_excerpt_zh"],
+                supported_years,
+            )
+
         # Combine structured sub-fields into per-language detailed_summary
         for lang in ("en", "zh"):
             if result.get(f"title_{lang}"):
@@ -366,13 +372,24 @@ class ContentEnricher:
         """Lightweight translation fallback: when full enrichment fails, at least
         translate the title and summary to Chinese so the item is not dropped."""
         try:
+            source_excerpt = (
+                item.metadata.get("original_excerpt")
+                or excerpt_from_feed_content(item.title, item.content)
+                or ""
+            )
             response = await self.client.complete(
-                system="You are a translator. Translate to Simplified Chinese. Return only valid JSON, no other text.",
+                system=(
+                    "You are a translator. Translate faithfully to Simplified Chinese. "
+                    "Do not analyze or add facts. Return only valid JSON, no other text."
+                ),
                 user=(
                     f'Title: {item.title}\n'
+                    f'Publisher excerpt: {source_excerpt}\n'
                     f'Summary: {item.ai_summary or item.title}\n\n'
                     'Return JSON:\n'
-                    '{"title_zh": "<中文标题>", "summary_zh": "<用中文写1-2句摘要>"}'
+                    '{"title_zh": "<中文标题>", '
+                    '"source_excerpt_zh": "<忠实翻译媒体内容；没有内容则为空字符串>", '
+                    '"summary_zh": "<用中文写1-2句摘要>"}'
                 ),
             )
             result = self._parse_json_response(response)
@@ -386,6 +403,11 @@ class ContentEnricher:
                 if result.get("summary_zh"):
                     item.metadata["detailed_summary_zh"] = remove_unsupported_years(
                         result["summary_zh"],
+                        supported_years,
+                    )
+                if result.get("source_excerpt_zh"):
+                    item.metadata["source_excerpt_zh"] = remove_unsupported_years(
+                        result["source_excerpt_zh"],
                         supported_years,
                     )
         except Exception:
