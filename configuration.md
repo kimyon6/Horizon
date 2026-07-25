@@ -625,7 +625,7 @@ Webhook notification is optional and disabled unless `webhook.enabled` is `true`
 
 - `enabled`: Turns webhook delivery on or off. The default is `false`.
 - `url_env`: Environment variable that contains the webhook URL. For example, set `HORIZON_WEBHOOK_URL=https://...` in `.env`.
-- `delivery`: Controls how messages are sent. Use `summary` for one full message, or `summary_and_items` for one overview message followed by one message per selected item.
+- `delivery`: Controls how messages are sent. Use `summary` for one full message, `summary_and_items` for one overview message plus one message per selected item, or `items_only` for item details without a repeated overview.
 - `overview_position`: Controls where the overview is sent in `summary_and_items` mode. Use `first` for the traditional order, or `last` to send item details in reverse and keep the overview as the newest chat message.
 - `platform`: Optional webhook platform hint. Use `generic` by default, or `feishu` / `lark` to enable platform-specific card rendering.
 - `layout`: Controls the message layout. Use `markdown` for templated Markdown delivery, or `collapsible` with `platform: "feishu"` / `"lark"` for a single Feishu Card JSON 2.0 message with each item in a collapsed panel.
@@ -642,6 +642,7 @@ When `request_body` is a JSON object or array, Horizon renders placeholders and 
 
 - `summary`: Sends one message containing the full daily summary. This is simple, but some chat platforms may reject long messages.
 - `summary_and_items`: Sends one overview message plus one message per selected item. In each item message, `#{summary}` contains only that item's Markdown body. This is useful for platforms that reject or truncate long messages.
+- `items_only`: Sends one message per selected item and omits the overview. This is useful for realtime alert channels where repeating every headline in a separate overview adds noise.
 
 `layout` controls how each message is rendered:
 
