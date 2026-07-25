@@ -140,7 +140,7 @@
   "webhook": {
     "enabled": true,
     "url_env": "HORIZON_WEBHOOK_URL",
-    "delivery": "summary_and_items",
+    "delivery": "items_only",
     "overview_position": "last",
     "platform": "generic",
     "layout": "markdown",

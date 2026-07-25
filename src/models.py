@@ -397,7 +397,7 @@ class WebhookConfig(BaseModel):
         None  # POST body: real JSON object or string with #{key} placeholders; if empty, will use GET
     )
     headers: Optional[str] = None  # Custom headers, "Key: Value" per line
-    delivery: str = "summary"  # summary, or summary_and_items
+    delivery: str = "summary"  # summary, summary_and_items, or items_only
     overview_position: str = "first"  # For summary_and_items: first, or last
     platform: str = "generic"  # generic, feishu, lark, dingtalk, slack, discord
     layout: str = "markdown"  # markdown, or collapsible
@@ -413,7 +413,7 @@ class WebhookConfig(BaseModel):
     @field_validator("delivery")
     @classmethod
     def validate_delivery(cls, v: str) -> str:
-        allowed = {"summary", "summary_and_items"}
+        allowed = {"summary", "summary_and_items", "items_only"}
         if v not in allowed:
             raise ValueError(f"webhook.delivery must be one of {allowed}, got '{v}'")
         return v

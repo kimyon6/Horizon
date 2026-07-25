@@ -1,6 +1,9 @@
 """Main orchestrator coordinating the entire workflow."""
 
 import asyncio
+import hashlib
+import re
+import unicodedata
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -104,6 +107,40 @@ def _deduplication_url_key(url: str) -> tuple[str, str, str, str, Optional[int],
         path,
         "&".join(query_parts),
     )
+
+
+def _normalized_seen_text(value: object) -> str:
+    """Normalize a headline or publisher for cross-run comparison."""
+    normalized = unicodedata.normalize("NFKC", str(value)).casefold()
+    return re.sub(r"[\W_]+", "", normalized, flags=re.UNICODE)
+
+
+def _seen_digest(namespace: str, value: object) -> str:
+    """Return a compact, non-sensitive persistent deduplication key."""
+    digest = hashlib.sha256(repr(value).encode("utf-8")).hexdigest()[:32]
+    return f"{namespace}:{digest}"
+
+
+def seen_item_keys(item: ContentItem) -> set[str]:
+    """Return stable keys that identify an article across feeds and runs.
+
+    The raw item ID remains included for backward compatibility with existing
+    state files. URL and title/publisher fingerprints prevent the same Google
+    News article from being treated as new when it appears through another
+    configured search feed.
+    """
+    keys = {str(item.id)}
+    url = str(item.metadata.get("resolved_url") or item.url).strip()
+    if url:
+        keys.add(_seen_digest("url", _deduplication_url_key(url)))
+
+    title = _normalized_seen_text(item.title)
+    publisher = _normalized_seen_text(
+        item.metadata.get("source_name") or item.author or ""
+    )
+    if title:
+        keys.add(_seen_digest("title", (title, publisher)))
+    return keys
 
 
 @dataclass
@@ -281,7 +318,11 @@ class HorizonOrchestrator:
                     self.config.filtering.seen_retention_hours,
                 )
                 before_seen_filter = len(merged_items)
-                merged_items = [item for item in merged_items if item.id not in seen_ids]
+                merged_items = [
+                    item
+                    for item in merged_items
+                    if seen_item_keys(item).isdisjoint(seen_ids)
+                ]
                 skipped = before_seen_filter - len(merged_items)
                 if skipped:
                     self.console.print(
@@ -293,7 +334,13 @@ class HorizonOrchestrator:
                     )
                     return
 
-            processed_item_ids = [item.id for item in merged_items]
+            processed_item_ids = sorted(
+                {
+                    key
+                    for item in merged_items
+                    for key in seen_item_keys(item)
+                }
+            )
 
             # 4. Analyze with AI
             analyzed_items = await self._analyze_content(merged_items)
@@ -391,7 +438,13 @@ class HorizonOrchestrator:
                 seen_item_ids = (
                     processed_item_ids
                     if self.config.filtering.seen_mark_processed
-                    else [item.id for item in important_items]
+                    else sorted(
+                        {
+                            key
+                            for item in important_items
+                            for key in seen_item_keys(item)
+                        }
+                    )
                 )
             else:
                 seen_item_ids = []
@@ -403,7 +456,7 @@ class HorizonOrchestrator:
                     self.config.filtering.seen_retention_hours,
                 )
                 self.console.print(
-                    f"🧾 Recorded {len(seen_item_ids)} processed alert items for deduplication\n"
+                    f"🧾 Recorded {len(seen_item_ids)} alert fingerprints for deduplication\n"
                 )
 
             self.console.print("[bold green]✅ Horizon completed successfully![/bold green]")

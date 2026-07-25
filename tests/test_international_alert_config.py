@@ -20,6 +20,8 @@ def test_daily_github_config_contains_only_steel_business_sources() -> None:
     }
     assert config.filtering.max_items == 14
     assert config.filtering.current_day_only is True
+    assert config.webhook is not None
+    assert config.webhook.enabled is False
 
 
 def test_realtime_steel_alert_config_is_valid_and_strict() -> None:
@@ -35,6 +37,7 @@ def test_realtime_steel_alert_config_is_valid_and_strict() -> None:
     assert config.filtering.seen_state_filename == "international-alert-seen.json"
     assert config.webhook is not None
     assert config.webhook.notify_when_empty is False
+    assert config.webhook.delivery == "items_only"
 
     enabled_feeds = [feed for feed in config.sources.rss if feed.enabled]
     categories = {feed.category for feed in enabled_feeds}

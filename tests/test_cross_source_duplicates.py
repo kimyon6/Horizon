@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from src.models import ContentItem, SourceType
-from src.orchestrator import HorizonOrchestrator
+from src.orchestrator import HorizonOrchestrator, seen_item_keys
 
 
 NOW = datetime(2026, 1, 1, tzinfo=timezone.utc)
@@ -138,3 +138,61 @@ def test_returns_deep_copies_without_mutation_and_is_idempotent() -> None:
     assert first[0].metadata["nested"] is not singleton.metadata["nested"]
     assert first[1] is not primary
     assert first[1].metadata["nested"] is not duplicate.metadata["nested"]
+
+
+def test_seen_keys_match_same_article_across_different_feed_item_ids() -> None:
+    first = item(
+        "rss:feed-one:abc",
+        "https://news.example.com/story?id=42&utm_source=google",
+        metadata={"source_name": "Example News"},
+    )
+    first.title = "Australian iron ore shipments disrupted"
+    second = item(
+        "rss:feed-two:def",
+        "https://news.example.com/story?id=42",
+        metadata={"source_name": "Example News"},
+    )
+    second.title = "Australian iron ore shipments disrupted"
+
+    first_keys = seen_item_keys(first)
+    second_keys = seen_item_keys(second)
+
+    assert first.id in first_keys
+    assert second.id in second_keys
+    assert first_keys & second_keys
+
+
+def test_seen_keys_match_title_and_publisher_when_feed_urls_differ() -> None:
+    first = item(
+        "rss:feed-one:abc",
+        "https://news.google.com/rss/articles/first-token",
+        metadata={"source_name": "Mysteel"},
+    )
+    first.title = "焦炭首轮提降今日落地"
+    second = item(
+        "rss:feed-two:def",
+        "https://news.google.com/rss/articles/second-token",
+        metadata={"source_name": "Mysteel"},
+    )
+    second.title = "焦炭首轮提降 今日落地！"
+
+    assert seen_item_keys(first) & seen_item_keys(second)
+
+
+def test_seen_keys_do_not_merge_same_title_from_different_publishers() -> None:
+    first = item(
+        "rss:feed-one:abc",
+        "https://one.example.com/story",
+        metadata={"source_name": "Publisher One"},
+    )
+    first.title = "钢材市场每日行情"
+    second = item(
+        "rss:feed-two:def",
+        "https://two.example.com/story",
+        metadata={"source_name": "Publisher Two"},
+    )
+    second.title = "钢材市场每日行情"
+
+    shared_keys = seen_item_keys(first) & seen_item_keys(second)
+
+    assert not shared_keys

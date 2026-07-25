@@ -172,7 +172,7 @@ def main() -> None:
     parser.add_argument(
         "--delivery",
         default=None,
-        choices=["summary", "summary_and_items"],
+        choices=["summary", "summary_and_items", "items_only"],
         help="Override the delivery mode from config for this test.",
     )
     args = parser.parse_args()

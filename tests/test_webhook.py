@@ -962,6 +962,37 @@ class TestSendDailySummary:
             assert item2_vars["item_url"] == "https://example.com/b"
         del os.environ[_TEST_URL_ENV]
 
+    def test_items_only_delivery_sends_details_without_overview(self):
+        os.environ[_TEST_URL_ENV] = _TEST_URL
+        config = WebhookConfig(
+            enabled=True,
+            url_env=_TEST_URL_ENV,
+            delivery="items_only",
+        )
+        notifier = WebhookNotifier(config)
+        summarizer = DailySummarizer()
+        items = [
+            _make_item(title="Item A"),
+            _make_item(title="Item B", url="https://example.com/b"),
+        ]
+
+        with patch.object(notifier, "notify", new_callable=AsyncMock) as mock_notify:
+            _run_async(
+                notifier.send_daily_summary(
+                    summary="# Full summary",
+                    important_items=items,
+                    all_items_count=20,
+                    date="2026-07-25",
+                    lang="zh",
+                    summarizer=summarizer,
+                )
+            )
+
+            assert mock_notify.call_count == 2
+            messages = [call.args[0] for call in mock_notify.call_args_list]
+            assert [message["message_kind"] for message in messages] == ["item", "item"]
+            assert all("总览" not in message["message_title"] for message in messages)
+
     def test_item_message_title_uses_original_not_ai_rewrite(self):
         os.environ[_TEST_URL_ENV] = _TEST_URL
         config = WebhookConfig(

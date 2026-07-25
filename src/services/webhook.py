@@ -510,24 +510,8 @@ class WebhookNotifier:
             ]
 
         delivery = getattr(self.config, "delivery", "summary")
-        if delivery == "summary_and_items":
+        if delivery in {"summary_and_items", "items_only"}:
             item_messages: List[dict[str, Any]] = []
-            overview = summarizer.generate_webhook_overview(
-                important_items,
-                date,
-                all_items_count,
-                language=lang,
-            )
-            overview_message = {
-                **base_vars,
-                "message_title": (
-                    f"Horizon {date} 总览"
-                    if lang == "zh"
-                    else f"Horizon {date} Overview"
-                ),
-                "message_kind": "overview",
-                "summary": overview,
-            }
             for item_index, item in enumerate(important_items, start=1):
                 title = webhook_item_title(item, lang)
                 item_summary = summarizer.generate_webhook_item(
@@ -549,6 +533,26 @@ class WebhookNotifier:
                         "summary": item_summary,
                     }
                 )
+
+            if delivery == "items_only":
+                return item_messages
+
+            overview = summarizer.generate_webhook_overview(
+                important_items,
+                date,
+                all_items_count,
+                language=lang,
+            )
+            overview_message = {
+                **base_vars,
+                "message_title": (
+                    f"Horizon {date} 总览"
+                    if lang == "zh"
+                    else f"Horizon {date} Overview"
+                ),
+                "message_kind": "overview",
+                "summary": overview,
+            }
 
             if getattr(self.config, "overview_position", "first") == "last":
                 return list(reversed(item_messages)) + [overview_message]
@@ -784,7 +788,8 @@ class WebhookNotifier:
     ) -> None:
         """Send daily summary webhook notification.
 
-        Handles language filtering, delivery mode (summary vs summary_and_items),
+        Handles language filtering, delivery mode (summary, summary_and_items,
+        or items_only),
         and variable construction internally.
 
         Args:
