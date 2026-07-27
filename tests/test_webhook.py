@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from src.models import ContentItem, SourceType, WebhookConfig
 from src.services.webhook import (
     WebhookNotifier,
+    WebhookDeliveryResult,
     WebhookDeliveryStatus,
     _format_markdown_for_webhook,
     _prepare_variables_for_body,
@@ -992,6 +993,38 @@ class TestSendDailySummary:
             messages = [call.args[0] for call in mock_notify.call_args_list]
             assert [message["message_kind"] for message in messages] == ["item", "item"]
             assert all("总览" not in message["message_title"] for message in messages)
+
+    def test_delivery_failure_raises_so_the_workflow_is_marked_failed(self):
+        os.environ[_TEST_URL_ENV] = _TEST_URL
+        config = WebhookConfig(
+            enabled=True,
+            url_env=_TEST_URL_ENV,
+            delivery="items_only",
+        )
+        notifier = WebhookNotifier(config)
+        item = _make_item(title="Important news")
+
+        failed_delivery = WebhookDeliveryResult(
+            WebhookDeliveryStatus.PLATFORM_FAILURE,
+            status_code=200,
+            detail="webhook platform rejected payload",
+        )
+        with patch.object(
+            notifier, "notify", new_callable=AsyncMock, return_value=failed_delivery
+        ) as mock_notify:
+            with pytest.raises(RuntimeError, match="Webhook delivery failed for 1/1"):
+                _run_async(
+                    notifier.send_daily_summary(
+                        summary="# Full summary",
+                        important_items=[item],
+                        all_items_count=1,
+                        date="2026-07-27",
+                        lang="zh",
+                        summarizer=DailySummarizer(),
+                    )
+                )
+            mock_notify.assert_called_once()
+        del os.environ[_TEST_URL_ENV]
 
     def test_item_message_title_uses_original_not_ai_rewrite(self):
         os.environ[_TEST_URL_ENV] = _TEST_URL

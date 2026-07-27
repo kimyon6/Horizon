@@ -816,8 +816,22 @@ class WebhookNotifier:
             return
 
         self.console.print(f"🔔 Sending {lang.upper()} webhook notification...")
+        failed_deliveries: list[WebhookDeliveryResult] = []
         for message in messages:
-            await self.notify(message)
+            delivery = await self.notify(message)
+            if not delivery.sent:
+                failed_deliveries.append(delivery)
+
+        if failed_deliveries:
+            details = "; ".join(
+                f"{delivery.status.value}"
+                f"{f' (HTTP {delivery.status_code})' if delivery.status_code else ''}"
+                f"{f': {delivery.detail}' if delivery.detail else ''}"
+                for delivery in failed_deliveries
+            )
+            raise RuntimeError(
+                f"Webhook delivery failed for {len(failed_deliveries)}/{len(messages)} message(s): {details}"
+            )
 
     async def send_failure(
         self,
